@@ -38,7 +38,7 @@ end
 local GAMES = {
     [142823291] = {
         Name = "Murder Mystery 2",
-        Module = "Novaa/Games/MM2.lua",
+        Module = "Games/MM2.lua",
     },
     -- [YOUR_CASE_PLACE_ID] = {
     --     Name = "Case Unboxing",
@@ -93,7 +93,7 @@ if uiLibrary and type(uiLibrary.CreateWindow) == "function" then
             title = "Novaa",
             subtitle = gameInfo and gameInfo.Name or "Unsupported game",
             size = Vector2.new(560, 420),
-            menuKey = "RightShift",
+            menuKey = "LeftControl",
             configName = "Novaa",
             autoSave = true,
         })
@@ -104,15 +104,8 @@ if uiLibrary and type(uiLibrary.CreateWindow) == "function" then
         local info = gameTab:Section("Detection", "Left")
         info:Label(placeText)
         info:Label("Game: " .. (gameInfo and gameInfo.Name or "Unsupported"))
-        info:Toggle("Load game module", false, function(value)
-            if value then startGameModule() end
-        end)
 
-        local actions = gameTab:Section("Actions", "Right")
-        actions:Button("Load Detected Game", function()
-            startGameModule()
-        end)
-        actions:Label("Modules are selected by exact PlaceId.")
+        startGameModule()
 
         pcall(function() window:AddSettingsTab() end)
         log("INS-ui menu loaded")
