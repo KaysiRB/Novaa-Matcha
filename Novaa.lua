@@ -1,101 +1,109 @@
--- Novaa: Matcha module hub for the scripts in C:\matcha\scripts\Novaa
+-- Novaa main loader: exact PlaceId -> game module selection.
 
-local ROOT = "https://raw.githubusercontent.com/KaysiRB/Novaa-Matcha/main/Novaa/"
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+local BASE_URL = "https://raw.githubusercontent.com/KaysiRB/Novaa-Matcha/main/"
+local UI_URL = "https://raw.githubusercontent.com/neaxusxgod-png/INS-ui/main/uilib.min.lua"
 
-local function loadLocal(path)
-    local source = game:HttpGet(path)
+local function log(message)
+    print("[Novaa] " .. tostring(message))
+end
+
+local function httpGet(url)
+    local ok, body = pcall(function() return game:HttpGet(url) end)
+    if ok and type(body) == "string" and body ~= "" then return body end
+    return nil, body
+end
+
+local function runSource(source, name)
     local compiler = loadstring or load
-    local chunk = compiler(source, "@" .. path)
-    return chunk()
+    if type(compiler) ~= "function" then return nil, "loadstring unavailable" end
+    local okCompile, chunk = pcall(compiler, source, name)
+    if not okCompile or type(chunk) ~= "function" then return nil, chunk end
+    local okRun, result = pcall(chunk)
+    if not okRun then return nil, result end
+    return result
 end
 
-local function log(text)
-    print("[Novaa] " .. tostring(text))
+local function loadRemote(url, name)
+    local source, requestError = httpGet(url)
+    if not source then return nil, "HTTP failed: " .. tostring(requestError) end
+    return runSource(source, name)
 end
 
-local Modules = {
-    Gakuran = loadLocal(ROOT .. "Modules/Gakuran.lua"),
-    MM2ESP = loadLocal(ROOT .. "Modules/MM2ESP.lua"),
-    CaseUnboxing = loadLocal(ROOT .. "Modules/CaseUnboxing.lua"),
+local function getPlaceId()
+    local ok, value = pcall(function() return game.PlaceId end)
+    return ok and tonumber(value) or 0
+end
+
+-- Register exact game IDs here. No object heuristics are used.
+local GAMES = {
+    [142823291] = {
+        Name = "Murder Mystery 2",
+        Module = "Novaa/Games/MM2.lua",
+    },
+    -- [YOUR_CASE_PLACE_ID] = {
+    --     Name = "Case Unboxing",
+    --     Module = "Novaa/Games/Case-Unboxing.lua",
+    -- },
 }
 
-local function getValue(property)
-    local ok, value = pcall(function() return game[property] end)
-    return ok and value or nil
-end
+local placeId = getPlaceId()
+local gameInfo = GAMES[placeId]
+local loadedModule
 
-local function detect()
-    local map = workspace:FindFirstChild("Map")
-    local hasDrawing = Drawing ~= nil
-    local isMM2 = map ~= nil and hasDrawing
-    local isCase = workspace:FindFirstChild("Cases") ~= nil
-        or workspace:FindFirstChild("Case") ~= nil
-        or workspace:FindFirstChild("Unboxing") ~= nil
-    return isMM2, isCase
-end
-
-local function loadUi()
-    if UI then return true end
-    local url = "https://raw.githubusercontent.com/neaxusxgod-png/INS-ui/main/uilib.min.lua"
-    local ok = pcall(function()
-        local source = game:HttpGet(url)
-        local compiler = loadstring or load
-        local chunk = compiler(source, "@NovaaUILib")
-        chunk()
-    end)
-    return ok and UI ~= nil
-end
-
-local isMM2, isCase = detect()
-log("PlaceId=" .. tostring(getValue("PlaceId")) .. " MM2=" .. tostring(isMM2) .. " Case=" .. tostring(isCase))
-
-if not loadUi() then
-    log("UI library unavailable; modules can still be started by changing the flags below")
-end
-
-local started = {}
-local function setModule(name, enabled)
-    local module = Modules[name]
-    if not module then return end
-    if enabled and not started[name] then
-        started[name] = module.Start()
-        log(name .. (started[name] and " started" or " failed"))
-    elseif not enabled and started[name] then
-        module.Stop()
-        started[name] = false
-        log(name .. " stopped")
+local function startGameModule()
+    if not gameInfo then
+        log("No module registered for PlaceId " .. tostring(placeId))
+        return false
     end
+    if loadedModule then return true end
+
+    local result, err = loadRemote(BASE_URL .. gameInfo.Module, "@" .. gameInfo.Module)
+    if result == nil and err then
+        log("Module failed: " .. tostring(err))
+        return false
+    end
+
+    loadedModule = result or true
+    if type(result) == "table" and type(result.Start) == "function" then
+        local ok, startError = pcall(result.Start, result)
+        if not ok then
+            log("Module start failed: " .. tostring(startError))
+            loadedModule = nil
+            return false
+        end
+    end
+    log("Loaded " .. gameInfo.Name)
+    return true
+end
+
+local placeText = "PlaceId: " .. tostring(placeId)
+log(placeText)
+log(gameInfo and ("Detected game: " .. gameInfo.Name) or "Unknown game")
+
+if not UI then
+    local _, uiError = loadRemote(UI_URL, "@NovaaUILib")
+    if uiError and not UI then log("UI library failed: " .. tostring(uiError)) end
 end
 
 if UI and UI.AddTab then
     UI.AddTab("Novaa", function(tab)
-        local main = tab:Section("Modules", "Left")
-        main:Text("PlaceId: " .. tostring(getValue("PlaceId")))
-        local g = main:Toggle("novaa_gakuran", "Gakuran", true, function(v) setModule("Gakuran", v) end)
-        local m = main:Toggle("novaa_mm2", "MM2 ESP", isMM2, function(v) setModule("MM2ESP", v) end)
-        local c = main:Toggle("novaa_case", "Case Unboxing", isCase, function(v) setModule("CaseUnboxing", v) end)
-        main:Keybind("novaa_gakuran_key", 0, "toggle")
-        main:Text("Case Unboxing also keeps its original F1 control.")
+        local info = tab:Section("Game Detection", "Left")
+        info:Text(placeText)
+        info:Text("Game: " .. (gameInfo and gameInfo.Name or "Unsupported"))
+        info:Toggle("novaa_game_enabled", "Load game module", false, function(value)
+            if value and not startGameModule() then
+                UI.SetValue("novaa_game_enabled", false)
+            end
+        end)
 
         local actions = tab:Section("Actions", "Right")
-        actions:Button("Start Detected Modules", function()
-            setModule("Gakuran", true)
-            if isMM2 then setModule("MM2ESP", true) end
-            if isCase then setModule("CaseUnboxing", true) end
+        actions:Button("Load Detected Game", function()
+            if startGameModule() then UI.SetValue("novaa_game_enabled", true) end
         end)
-        actions:Button("Stop MM2 ESP", function() setModule("MM2ESP", false) end)
-        actions:Button("Refresh Detection", function()
-            isMM2, isCase = detect()
-            log("Detection refreshed: MM2=" .. tostring(isMM2) .. " Case=" .. tostring(isCase))
-        end)
+        actions:Text("Modules are selected by exact PlaceId.")
     end)
+else
+    log("Novaa menu unavailable")
 end
-
--- Start Gakuran automatically; game-specific modules are detection driven.
-setModule("Gakuran", true)
-if isMM2 then setModule("MM2ESP", true) end
-if isCase then setModule("CaseUnboxing", true) end
 
 log("ready")
