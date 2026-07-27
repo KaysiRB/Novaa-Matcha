@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "wabi-matcha": {
+      "type": "http",
+      "url": "https://doc.wabisabi.mom/matcha/mcp"
+    }
+  }
+}
