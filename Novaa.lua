@@ -80,30 +80,47 @@ local placeText = "PlaceId: " .. tostring(placeId)
 log(placeText)
 log(gameInfo and ("Detected game: " .. gameInfo.Name) or "Unknown game")
 
-if not UI then
-    local _, uiError = loadRemote(UI_URL, "@NovaaUILib")
-    if uiError and not UI then log("UI library failed: " .. tostring(uiError)) end
+local uiLibrary = INSui
+if not uiLibrary then
+    local loaded, uiError = loadRemote(UI_URL, "@NovaaUILib")
+    uiLibrary = loaded or INSui
+    if not uiLibrary then log("INS-ui failed: " .. tostring(uiError)) end
 end
 
-if UI and UI.AddTab then
-    UI.AddTab("Novaa", function(tab)
-        local info = tab:Section("Game Detection", "Left")
-        info:Text(placeText)
-        info:Text("Game: " .. (gameInfo and gameInfo.Name or "Unsupported"))
-        info:Toggle("novaa_game_enabled", "Load game module", false, function(value)
-            if value and not startGameModule() then
-                UI.SetValue("novaa_game_enabled", false)
-            end
+if uiLibrary and type(uiLibrary.CreateWindow) == "function" then
+    local okWindow, window = pcall(function()
+        return uiLibrary:CreateWindow({
+            title = "Novaa",
+            subtitle = gameInfo and gameInfo.Name or "Unsupported game",
+            size = Vector2.new(560, 420),
+            menuKey = "RightShift",
+            configName = "Novaa",
+            autoSave = true,
+        })
+    end)
+
+    if okWindow and window then
+        local gameTab = window:Tab("Game", "home")
+        local info = gameTab:Section("Detection", "Left")
+        info:Label(placeText)
+        info:Label("Game: " .. (gameInfo and gameInfo.Name or "Unsupported"))
+        info:Toggle("Load game module", false, function(value)
+            if value then startGameModule() end
         end)
 
-        local actions = tab:Section("Actions", "Right")
+        local actions = gameTab:Section("Actions", "Right")
         actions:Button("Load Detected Game", function()
-            if startGameModule() then UI.SetValue("novaa_game_enabled", true) end
+            startGameModule()
         end)
-        actions:Text("Modules are selected by exact PlaceId.")
-    end)
+        actions:Label("Modules are selected by exact PlaceId.")
+
+        pcall(function() window:AddSettingsTab() end)
+        log("INS-ui menu loaded")
+    else
+        log("INS-ui window creation failed: " .. tostring(window))
+    end
 else
-    log("Novaa menu unavailable")
+    log("INS-ui unavailable")
 end
 
 log("ready")
