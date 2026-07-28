@@ -1,7 +1,6 @@
 -- Novaa main loader: exact PlaceId -> game module selection.
 
 local BASE_URL = "https://raw.githubusercontent.com/KaysiRB/Novaa-Matcha/main/"
-local UI_URL = "https://raw.githubusercontent.com/neaxusxgod-png/INS-ui/main/uilib.min.lua"
 
 local function log(message)
     print("[Novaa] " .. tostring(message))
@@ -80,40 +79,4 @@ local placeText = "PlaceId: " .. tostring(placeId)
 log(placeText)
 log(gameInfo and ("Detected game: " .. gameInfo.Name) or "Unknown game")
 
-local uiLibrary = INSui
-if not uiLibrary then
-    local loaded, uiError = loadRemote(UI_URL, "@NovaaUILib")
-    uiLibrary = loaded or INSui
-    if not uiLibrary then log("INS-ui failed: " .. tostring(uiError)) end
-end
-
-if uiLibrary and type(uiLibrary.CreateWindow) == "function" then
-    local okWindow, window = pcall(function()
-        return uiLibrary:CreateWindow({
-            title = "Novaa",
-            subtitle = gameInfo and gameInfo.Name or "Unsupported game",
-            size = Vector2.new(560, 420),
-            menuKey = "LeftControl",
-            configName = "Novaa",
-            autoSave = true,
-        })
-    end)
-
-    if okWindow and window then
-        local gameTab = window:Tab("Game", "home")
-        local info = gameTab:Section("Detection", "Left")
-        info:Label(placeText)
-        info:Label("Game: " .. (gameInfo and gameInfo.Name or "Unsupported"))
-
-        startGameModule()
-
-        pcall(function() window:AddSettingsTab() end)
-        log("INS-ui menu loaded")
-    else
-        log("INS-ui window creation failed: " .. tostring(window))
-    end
-else
-    log("INS-ui unavailable")
-end
-
-log("ready")
+startGameModule()
