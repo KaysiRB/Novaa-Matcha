@@ -1,7 +1,5 @@
 # Ignore the files
 assets/
-Matcha.bat
-Matcha.lnk
 
 # IDE settings
 .vscode/
