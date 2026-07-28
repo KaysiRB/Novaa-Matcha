@@ -562,7 +562,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
 			end
 		end
 	end
-end]
+end)
 
 -- ==========================================
 -- UI Initialization
