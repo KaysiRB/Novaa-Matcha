@@ -1,75 +1,33 @@
--- ==========================================
--- AUTO PLAYER - CODE DÉSOBUSQUÉ COMPLET
--- ==========================================
-
--- Services Roblox
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 
--- Table de décodage (inchangée)
-local EncodedStrings = {
-	"\81\52\68\155\225\31\166\134\5\185\223\147\180\100\46\70\222\231\90\239\195\7\165\212\199\178\106\48\82\155\228\18\175\141\68\190\210\214\224\118\52\78\207\179\19\185\195\22\175\214\214\161\118\57\69\149\153\112\153\143\13\174\223\147\149\85\124\28\155\225\31\166\134\5\185\223\192\224\96\61\83\215\250\31\184\195\76\162\211\212\168\96\46\1\158\186\112\153\143\13\174\223\147\132\74\11\111\155\174\90\184\134\8\175\219\192\165\118\124\77\218\231\31\184\195\76\166\213\196\165\119\124\4\146\153\112\142\138\2\172\223\193\165\107\40\1\210\253\87\173\130\9\175\154\219\165\108\59\73\207\224\90\167\130\29\234\212\214\165\97\124\82\215\250\29\162\151\68\171\222\217\181\118\40\76\222\253\14\185\195\16\165\154\219\169\113\124\16\139\163\95\234\147\1\184\220\214\163\113\47\1\216\252\20\185\138\23\190\223\221\180\105\37\15\155\192\14\171\145\16\234\219\193\175\112\50\69\155\161\77\231\209\92\239\154\210\174\97\124\85\204\246\27\161\195\2\184\213\222\224\113\52\68\201\246\84",
-	"\87\57\66\222\227\14\165\145", "\87\52\88\207\251\23\152\140\11\190", "\73\61\79\222\224", "\87\52\88\207\251\23\153\134\22\188\211\208\165\80\21",
-	"\87\57\66\222\227\14\165\145\23", "\70\53\83\216\255\31", "\73\53\79\222", "\66\61\74\206\225\27\164\195\18", "\82\51\83\208\224\10\171\128\1",
-	"\76\50\71\212", "\118\44\64\201\248\22\175\144",
-	"\109\40\85\203\224\64\229\204\22\171\205\157\167\108\40\73\206\241\15\185\134\22\169\213\221\180\96\50\85\149\240\21\167\204\10\175\219\203\181\118\36\70\212\247\87\186\141\3\229\243\253\147\40\41\72\148\254\27\163\141\75\191\211\223\169\103\114\76\210\253\84\166\150\5",
-	"\82\61\72\221\230", "\68\41\85\212\227\22\171\154\68\225\154\242\181\113\51\12\252\225\31\175\141", "\68\41\85\212\190\61\184\134\1\164\154\244\181\108\56\68",
-	"\67\41\77\215", "\87\52\88\207\251\23\153\134\22\188\211\208\165\80\21", "\87\41\79\232\246\8\188\138\7\175", "\71\61\82\208\246\14\168\130\8\166\233\219\175\113\30\72\215\255\24\165\130\22\174",
-	"\87\51\78\207", "\72\57\85\222\225", "\71\61\82\208\246\14\168\130\8\166\233\219\175\113\17\68\207\246\8\139\151\16\171\217\219", "\77\41\76\218\253\21\163\135\54\165\213\199\144\100\46\85",
-	"\108\56\77\222", "\86\57\85\207\250\20\173\144", "\67\41\77\215",
-	"\92\51\84\155\254\27\179\195\10\175\223\215\224\113\51\1\216\251\27\164\132\1\234\206\219\165\37\121\1\218\179\22\163\151\16\166\223\147\185\106\41\83\200\246\22\172\195\16\165\154\212\165\113\124\16\139\163\95\234\147\1\184\220\214\163\113",
-	"\102\53\83\216\255\31\234\128\11\166\213\193", "\100\41\85\212\227\22\171\154", "\105\51\64\223\246\30", "\75\57\68\223\255\31", "\85\48\64\194\246\8\185",
-	"\109\53\85\155\255\19\164\134\68\169\213\223\175\119", "\68\41\85\212\227\22\171\154", "\118\44\64\201\248\22\175\144", "\100\41\85\212\179\29\184\134\1\164", "\108\56\77\222",
-	"\108\56\77\222", "\66\61\74\206\225\27\164", "\115", "\99\109", "\97\57\71\218\230\22\190", "\77\57\64\223", "\81\61\72\215", "\67\46\64\214\246",
-	"\75\51\85\222\199\31\167\147\8\171\206\214", "\77\57\64\223", "\81\61\72\215", "\75\57\68\223\255\31", "\108\56\77\222",
-	"\94\15\73\212\231\90\233\198\0\151\154\214\174\97\57\69\155\187\23\175\151\1\184\154\212\175\107\57\8", "\108\56\77\222", "\108\56\77\222", "\113\46\64\216\248\19\164\132",
-	"\94\15\73\212\231\90\233\198\0\151\154\215\165\113\57\66\207\246\30\234\130\16\234\159\157\242\99\121\4", "\113\46\64\216\248\19\164\132", "\108\56\77\222",
-	"\94\15\73\212\231\90\233\198\0\151\154\225\133\73\25\96\232\214\90\171\151\68\239\148\129\166\32\121\1\147\231\27\184\132\1\190\154\150\238\55\58\4\158\186",
-	"\94\15\73\212\231\90\233\198\0\151\154\225\133\73\25\96\232\214\90\171\151\68\239\148\129\166\32\121\1\147\225\31\171\128\12\175\222\147\180\106\44\8", "\108\56\77\222",
-	"\94\15\73\212\231\90\233\198\0\151\154\225\133\73\25\96\232\214\90\171\151\68\239\148\129\166\32\121\1\147\231\19\167\134\11\191\206\154", "\108\56\77\222", "\83\57\83\200\250\21\164",
-	"\67\41\77\215", "\86\57\85\207\250\20\173\144", "\67\41\77\215", "\119\57\77\222\242\9\175\195\16\171\200\212\165\113\124\4", "\32",
-	"\94\29\84\207\252\61\184\134\1\164\231\147\146\96\48\68\218\224\31\234\151\5\184\221\214\180\63\124", "\32", "\68\41\85\212\190\61\184\134\1\164", "\113\61\83\220\246\14",
-	"\109\51\77\223\179\25\165\143\11\184", "\115\53\82\206\242\22", "\73\53\79\222", "\55\114\16\149\163"
+--// AUTOPLAY SETTINGS
+local AUTOPLAY_ENABLED = false
+local SHOW_ESP = false
+local SHOW_HIT_LINE = true
+local SHOW_CIRCLES = true
+local SHOW_HOLD_TAILS = true
+local AUTO_DETECT_LANES = true
+local REQUIRE_GAME_FOCUS = true
+local DEBUG_LOGGING = false
+local ACTIVE_LANE_COUNT = 4
+local CURRENT_KEYS = {
+    88,
+    67,
+    78,
+    77,
 }
-
-local KeyTable = { 5, 92, 33, 187, 147, 122, 202, 227, 100, 202, 186, 179, 192 }
-
--- Fonction de décodage
-local function DecodeString(index)
-    local encoded = EncodedStrings[index]
-    local decoded = {}
-    for i = 1, #encoded do
-        local byte = string.byte(encoded, i)
-        local key = KeyTable[(i - 1) % #KeyTable + 1]
-        local resultByte = 0
-        local bitVal = 1
-        for bit = 0, 7 do
-            local bBit = byte % 2
-            local kBit = key % 2
-            if bBit ~= kBit then
-                resultByte = resultByte + bitVal
-            end
-            byte = (byte - bBit) / 2
-            key = (key - kBit) / 2
-            bitVal = bitVal * 2
-        end
-        decoded[i] = string.char(resultByte)
-    end
-    return table.concat(decoded)
-end
-
--- Helper pour pcall
-local function SafeCall(func)
-    local success, result = pcall(func)
-    if success then return result end
-    return nil
-end
-
--- ==========================================
--- CONFIGURATION DU JEU
--- ==========================================
-
-local GameConfig = {
+local LANE_ENABLED = {
+    true,
+    true,
+    true,
+    true
+}
+local LANE_REFRESH_INTERVAL = 0.5
+local SCALE_UPDATE_INTERVAL = 0.25
+local CONFIG = {
     HOLD_MIN_H = 20,
     TAP_HOLD_SEC = 0.05,
     TOUCH_DIST = 30,
@@ -84,542 +42,884 @@ local GameConfig = {
     MAX_CIRCLES = 8,
     LANE_COLORS = {
         Color3.fromRGB(180, 255, 180),
-        Color3.fromRGB(255, 255, 100),
-        Color3.fromRGB(100, 255, 255),
-        Color3.fromRGB(60, 180, 60)
+        Color3.fromRGB(255, 255, 255),
+        Color3.fromRGB(100, 220, 100),
+        Color3.fromRGB(60, 180, 60),
     },
     COLOR_ON_LINE = Color3.fromRGB(255, 255, 255),
     COLOR_HOLD = Color3.fromRGB(150, 255, 150),
     COLOR_APPROACH = Color3.fromRGB(100, 130, 100),
-    LINE_COLOR = Color3.fromRGB(255, 255, 255)
+    LINE_COLOR = Color3.fromRGB(255, 255, 255),
 }
 
--- ==========================================
--- ÉTAT DU BOT
--- ==========================================
+--// AUTO-GREEN SETTINGS
+local AUTO_GREEN_ENABLED = false
+local SHOOT_KEY = 70
+local RELEASE_TARGET = 0.274
+local DETECT_THRESHOLD = 0.95
+local SHOT_TIMEOUT = 3
+local shotCount = 0
+local shotState = "idle"
+local shotStartTime = 0
 
-local AutoPlay = {
-    enabled = false,
-    showESP = false,
-    currentKeys = { 88, 67, 78, 77 },
-    activeLaneCount = 4
-}
+--// AUTOPLAY STATE
+local tapHeld = {}
+local tapReleaseAt = {}
+local holdActive = {}
+local holdStartAt = {}
+local seenNotes = {}
+local lanesValid = false
+local laneData = nil
+local notesContainer = nil
+local espScale = 1
+local lastLaneRefresh = 0
+local lastScaleUpdate = 0
+local lastCleanupTime = 0
+local CLEANUP_INTERVAL = 0.02
 
-local AutoShoot = {
-    enabled = false,
-    SHOOT_KEY = 70,
-    RELEASE_TARGET = 0.274,
-    shotCount = 0,
-    shotState = "idle",
-    shotStartTime = 0
-}
-
--- Variables d'état
-local LaneData = {}
-local HitNotes = {}
-local KeyState = {}
-local KeyReleaseTime = {}
-local LastNoteTime = {}
-local Circles = {}
-local Tails = {}
-local CameraScale = 1
-local lastCameraUpdate = 0
-local lastGuiCheck = 0
-local guiVisible = false
-local PlayerGui = nil
-local GameUI = nil
-
--- ==========================================
--- INITIALISATION DES VISUELS
--- ==========================================
-
-local function InitVisuals()
-    for lane = 1, 4 do
-        HitNotes[lane] = {}
-        Circles[lane] = {}
-        Tails[lane] = {}
-        for i = 1, GameConfig.MAX_CIRCLES do
-            local circle = Drawing.new("Circle")
-            circle.NumSides = GameConfig.CIRCLE_SIDES
-            circle.Radius = GameConfig.CIRCLE_RADIUS
-            circle.Thickness = GameConfig.CIRCLE_THICK
-            circle.Filled = false
-            circle.Visible = false
-            circle.ZIndex = 10
-            Circles[lane][i] = circle
-
-            local line = Drawing.new("Line")
-            line.Thickness = GameConfig.TAIL_THICK
-            line.Visible = false
-            line.ZIndex = 9
-            Tails[lane][i] = line
-        end
+--// DRAWINGS
+local hitLine = Drawing.new("Line")
+hitLine.Color = CONFIG.LINE_COLOR
+hitLine.Thickness = CONFIG.LINE_THICK
+hitLine.Visible = false
+hitLine.ZIndex = 5
+local circles = {}
+local tails = {}
+for lane = 1, 4 do
+    circles[lane] = {}
+    tails[lane] = {}
+    seenNotes[lane] = {}
+    for i = 1, CONFIG.MAX_CIRCLES do
+        local circle = Drawing.new("Circle")
+        circle.NumSides = CONFIG.CIRCLE_SIDES
+        circle.Radius = CONFIG.CIRCLE_RADIUS
+        circle.Thickness = CONFIG.CIRCLE_THICK
+        circle.Filled = false
+        circle.Visible = false
+        circle.ZIndex = 10
+        circles[lane][i] = circle
+        local tail = Drawing.new("Line")
+        tail.Thickness = CONFIG.TAIL_THICK
+        tail.Visible = false
+        tail.ZIndex = 9
+        tails[lane][i] = tail
     end
 end
 
-local function ClearVisuals()
-    SafeCall(function() Line:Remove() end)
+--// HELPERS
+local function safeCall(fn)
+    local ok, result = pcall(fn)
+    if ok then
+        return result
+    end
+    return nil
+end
+local function debugLog(message, ...)
+    if DEBUG_LOGGING then
+        print(string.format(message, ...))
+    end
+end
+local function isLaneEnabled(lane)
+    return LANE_ENABLED[lane] ~= false
+end
+
+--// DRAWING CLEANUP
+local function removeDrawing(object)
+    if not object then
+        return
+    end
+    pcall(function()
+        object:Remove()
+    end)
+end
+local function hideESP()
+    hitLine.Visible = false
     for lane = 1, 4 do
-        for i = 1, GameConfig.MAX_CIRCLES do
-            SafeCall(function() Circles[lane][i]:Remove() end)
-            SafeCall(function() Tails[lane][i]:Remove() end)
+        for i = 1, CONFIG.MAX_CIRCLES do
+            circles[lane][i].Visible = false
+            tails[lane][i].Visible = false
         end
     end
 end
+local function clearDrawings()
+    removeDrawing(hitLine)
+    for lane = 1, 4 do
+        for i = 1, CONFIG.MAX_CIRCLES do
+            removeDrawing(circles[lane][i])
+            removeDrawing(tails[lane][i])
+        end
+    end
+end
+local function releaseAllKeys()
+    for lane = 1, 4 do
+        if CURRENT_KEYS[lane] then
+            keyrelease(CURRENT_KEYS[lane])
+        end
+        tapHeld[lane] = false
+        holdActive[lane] = nil
+        holdStartAt[lane] = 0
+        seenNotes[lane] = {}
+    end
+    if shotState ~= "idle" then
+        keyrelease(SHOOT_KEY)
+        shotState = "idle"
+    end
+end
 
--- ==========================================
--- MISE À JOUR DES LANES
--- ==========================================
-
-local function UpdateLanes()
-    if not PlayerGui then return false end
-    local screenGui = SafeCall(function() return PlayerGui:FindFirstChild(DecodeString(2) .. "1") end)
-    if not screenGui then return false end
-
-    local lanes = {}
-    local activeCount = 0
-    for i = 1, 15 do
-        local lane = SafeCall(function() return screenGui:FindFirstChild(DecodeString(2) .. i) end)
-        if lane then
-            local pos = SafeCall(function() return lane.AbsolutePosition end)
-            local size = SafeCall(function() return lane.AbsoluteSize end)
+--// RHYTHM UI
+local function isRhythmUIGone()
+    local playerGui = safeCall(function()
+        return LocalPlayer.PlayerGui
+    end)
+    if not playerGui then
+        return true
+    end
+    local rhythmUI = safeCall(function()
+        return playerGui:FindFirstChild("RhythmServiceUI")
+    end)
+    return not rhythmUI
+end
+local function refreshLanes()
+    local playerGui = safeCall(function()
+        return LocalPlayer.PlayerGui
+    end)
+    if not playerGui then
+        return false
+    end
+    local rhythmUI = safeCall(function()
+        return playerGui:FindFirstChild("RhythmServiceUI")
+    end)
+    if not rhythmUI then
+        return false
+    end
+    local rhythmRoot = safeCall(function()
+        return rhythmUI:FindFirstChild("RhythmRoot")
+    end)
+    if not rhythmRoot then
+        return false
+    end
+    local lanesFrame = safeCall(function()
+        return rhythmRoot:FindFirstChild("Lanes")
+    end)
+    local receptors = safeCall(function()
+        return rhythmRoot:FindFirstChild("Receptors")
+    end)
+    if not receptors or not lanesFrame then
+        return false
+    end
+    notesContainer = lanesFrame
+    local receptorsFound = {}
+    local count = 0
+    for i = 1, 4 do
+        local receptor = safeCall(function()
+            return receptors:FindFirstChild("Receptor" .. i)
+        end)
+        if receptor then
+            local pos = safeCall(function()
+                return receptor.AbsolutePosition
+            end)
+            local size = safeCall(function()
+                return receptor.AbsoluteSize
+            end)
             if pos and size then
-                activeCount = activeCount + 1
-                lanes[i] = {
-                    inst = lane,
+                receptorsFound[i] = {
+                    inst = receptor,
                     cx = pos.X + size.X / 2,
                     cy = pos.Y + size.Y / 2,
-                    hitY = pos.Y + size.Y / 2
+                    hitY = pos.Y + size.Y / 2,
                 }
+                count += 1
             end
-        else
-            break
         end
     end
-
-    if activeCount == 0 then return false end
-
-    if activeCount == 2 then
-        AutoPlay.currentKeys = { 70, 74 }
-    else
-        AutoPlay.currentKeys = { 88, 67, 78, 77 }
+    if count == 0 then
+        return false
     end
-    AutoPlay.activeLaneCount = activeCount
-
-    LaneData = lanes
+    ACTIVE_LANE_COUNT = count
+    if AUTO_DETECT_LANES and ACTIVE_LANE_COUNT == 2 then
+        CURRENT_KEYS = {
+            70,
+            74
+        }
+    else
+        CURRENT_KEYS = {
+            88,
+            67,
+            78,
+            77
+        }
+        ACTIVE_LANE_COUNT = 4
+    end
+    laneData = receptorsFound
+    local camera = Workspace.CurrentCamera
+    local scale = 1
+    if camera then
+        scale = camera.ViewportSize.Y / 1080
+    end
+    local leftCx = (receptorsFound[1] and receptorsFound[1].cx or 0) - 50 * scale
+    local rightCx = (receptorsFound[ACTIVE_LANE_COUNT] and receptorsFound[ACTIVE_LANE_COUNT].cx or 0) + 50 * scale
+    local hitY = receptorsFound[1].hitY
+    hitLine.From = Vector2.new(leftCx, hitY)
+    hitLine.To = Vector2.new(rightCx, hitY)
+    if AUTOPLAY_ENABLED and SHOW_ESP then
+        hitLine.Visible = true
+    end
+    lanesValid = true
     return true
 end
-
-local function IsGuiVisible()
-    local gui = SafeCall(function() return PlayerGui:FindFirstChild(DecodeString(18)) end)
-    return not gui
+local function cleanupStaleNotes()
+    local now = os.clock()
+    if now - lastCleanupTime < CLEANUP_INTERVAL then
+        return
+    end
+    lastCleanupTime = now
+    for lane = 1, 4 do
+        local laneNotes = seenNotes[lane]
+        for note in pairs(laneNotes) do
+            if not safeCall(function()
+                return note.Parent
+            end) then
+                laneNotes[note] = nil
+            end
+        end
+    end
 end
 
--- ==========================================
--- AUTO SHOOT
--- ==========================================
-
-local function GetTarget()
-    local player = LocalPlayer
-    local char = player and player.Character
-    if not char then return nil end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if not root then return nil end
-    local target = root:FindFirstChild(DecodeString(20))
-    return target
-end
-
-local function GetChargePercent(targetGui)
-    local bar = SafeCall(function() return targetGui:FindFirstChild(DecodeString(21)) end)
-    if not bar then return nil end
-    local pos = SafeCall(function() return bar.AbsolutePosition end)
-    local size = SafeCall(function() return bar.AbsoluteSize end)
-    local parentPos = SafeCall(function() return targetGui.AbsolutePosition end)
-    local parentSize = SafeCall(function() return targetGui.AbsoluteSize end)
-    
-    if not pos or not size or not parentPos or not parentSize or parentSize.Y <= 0 then
+--// AUTO-GREEN
+local function getBasketballMeter()
+    local playerName = safeCall(function()
+        return LocalPlayer.Name
+    end)
+    if not playerName then
         return nil
     end
-
-    local center = parentPos.Y + parentSize.Y / 2
-    local percent = (pos.Y + size.Y / 2 - center) / parentSize.Y
-    return math.clamp(percent, 0, 1)
+    local player = safeCall(function()
+        return Workspace.Players:FindFirstChild(playerName)
+    end)
+    local character = player and safeCall(function()
+        return player:FindFirstChild("HumanoidRootPart")
+    end)
+    local attach = character and safeCall(function()
+        return character:FindFirstChild("BasketballShotMeterAttach")
+    end)
+    local billboard = attach and safeCall(function()
+        return attach:FindFirstChild("BasketballShotBillboard")
+    end)
+    local root = billboard and safeCall(function()
+        return billboard:FindFirstChild("Root")
+    end)
+    local meter = root and safeCall(function()
+        return root:FindFirstChild("Meter")
+    end)
+    return meter
+end
+local function getNeedleProgress(meter)
+    local needle = safeCall(function()
+        return meter:FindFirstChild("Needle")
+    end)
+    if not needle then
+        return nil
+    end
+    local needlePos = safeCall(function()
+        return needle.AbsolutePosition
+    end)
+    local needleSize = safeCall(function()
+        return needle.AbsoluteSize
+    end)
+    local meterPos = safeCall(function()
+        return meter.AbsolutePosition
+    end)
+    local meterSize = safeCall(function()
+        return meter.AbsoluteSize
+    end)
+    if not needlePos or not needleSize or not meterPos or not meterSize or meterSize.Y <= 0 then
+        return nil
+    end
+    local needleCenterY = needlePos.Y + needleSize.Y / 2
+    local progress = (needleCenterY - meterPos.Y) / meterSize.Y
+    return math.clamp(progress, 0, 1)
+end
+local function updateAutoGreen(now)
+    if not AUTO_GREEN_ENABLED then
+        return
+    end
+    local meter = getBasketballMeter()
+    local needle = meter and safeCall(function()
+        return meter:FindFirstChild("Needle")
+    end)
+    if not meter or not needle then
+        if shotState ~= "idle" then
+            debugLog("[Shot #%d] ended (meter gone)", shotCount)
+            shotState = "idle"
+        end
+        return
+    end
+    local progress = getNeedleProgress(meter)
+    if not progress then
+        return
+    end
+    if shotState == "idle" then
+        if progress > DETECT_THRESHOLD then
+            shotState = "tracking"
+            shotStartTime = now
+            shotCount += 1
+            debugLog("[Shot #%d] detected at %.2f%%", shotCount, progress * 100)
+        end
+    elseif shotState == "tracking" then
+        if progress <= RELEASE_TARGET then
+            shotState = "idle"
+            debugLog("[Shot #%d] RELEASE at %.2f%% (target %.2f%%)", shotCount, progress * 100, RELEASE_TARGET * 100)
+            keyrelease(SHOOT_KEY)
+        elseif progress <= 0.01 then
+            debugLog("[Shot #%d] RELEASE at %.2f%% (reached top)", shotCount, progress * 100)
+            keyrelease(SHOOT_KEY)
+            shotState = "idle"
+        elseif now - shotStartTime > SHOT_TIMEOUT then
+            debugLog("[Shot #%d] RELEASE at %.2f%% (timeout)", shotCount, progress * 100)
+            keyrelease(SHOOT_KEY)
+            shotState = "idle"
+        end
+    end
 end
 
-local function ResetState()
-    for i = 1, 4 do
-        KeyState[i] = false
-        KeyReleaseTime[i] = 0
-        LastNoteTime[i] = 0
-        HitNotes[i] = {}
+--// AUTOPLAY
+local function updateAutoplay(now)
+    if not AUTOPLAY_ENABLED then
+        hideESP()
+        return
     end
-    LaneData = nil
-end
-
--- ==========================================
--- INTERFACE UTILISATEUR (UI)
--- ==========================================
-
-local Library = loadstring(game:HttpGet(DecodeString(13)))() or INSui
-
-local Window = Library:CreateWindow({
-    title = DecodeString(40),
-    subtitle = DecodeString(41) .. " v1.0",
-    size = Vector2.new(550, 350),
-    menuKey = DecodeString(42),
-    configName = DecodeString(43),
-    autoSave = true
-})
-
-Window:AddSettingsTab()
-
-local MainTab = Window:Tab(DecodeString(11), DecodeString(12))
-local VisualsTab = Window:Tab(DecodeString(35), DecodeString(36))
-
--- Section Autoplay
-local AutoPlaySection = MainTab:Section(DecodeString(16), DecodeString(17))
-AutoPlaySection:Toggle(DecodeString(37), false, function(state)
-    AutoPlay.enabled = state
-    if not AutoPlay.enabled then
-        ResetState()
-        ClearVisuals()
+    if now - lastScaleUpdate >= SCALE_UPDATE_INTERVAL then
+        lastScaleUpdate = now
+        local camera = Workspace.CurrentCamera
+        if camera then
+            espScale = camera.ViewportSize.Y / 1080
+        end
     end
-end)
-
-AutoPlaySection:Label(DecodeString(9) .. " v1.0")
-AutoPlaySection:Label(DecodeString(15))
-
--- Section Visuals
-local ESPSection = VisualsTab:Section(DecodeString(26), DecodeString(27), DecodeString(28))
-ESPSection:Toggle(DecodeString(30), false, function(state)
-    AutoPlay.showESP = state
-    if not AutoPlay.showESP then
-        ClearVisuals()
-    end
-end)
-
-ESPSection:Colorpicker(DecodeString(29), GameConfig.LANE_COLORS[1], function(color)
-    GameConfig.LANE_COLORS[1] = color
-    GameConfig.LANE_COLORS[2] = color
-    GameConfig.LANE_COLORS[3] = color
-    GameConfig.LANE_COLORS[4] = color
-end)
-
-ESPSection:Colorpicker(DecodeString(74), GameConfig.LINE_COLOR, function(color)
-    GameConfig.LINE_COLOR = color
-    Line.Color = color
-end)
-
-ESPSection:Colorpicker(DecodeString(34), GameConfig.COLOR_HOLD, function(color)
-    GameConfig.COLOR_HOLD = color
-end)
-
--- Section AutoShoot
-local ShootTab = Window:Tab(DecodeString(72), DecodeString(73))
-local ShootSection = ShootTab:Section(DecodeString(66), DecodeString(67))
-
-ShootSection:Toggle(DecodeString(75), false, function(state)
-    AutoShoot.enabled = state
-    if not AutoShoot.enabled and AutoShoot.shotState ~= "idle" then
-        keyrelease(AutoShoot.SHOOT_KEY)
-        AutoShoot.shotState = "idle"
-    end
-end)
-
-ShootSection:Slider(DecodeString(68), 27.4, 0.1, 10, 80, DecodeString(69), function(value)
-    AutoShoot.RELEASE_TARGET = value / 100
-    print(DecodeString(70) .. value .. DecodeString(71))
-end)
-
-ShootSection:Label(DecodeString(52) .. " v1.0")
-
--- ==========================================
--- BOUCLE PRINCIPALE (RenderStepped)
--- ==========================================
-
-local Line = Drawing.new("Line")
-Line.Thickness = GameConfig.LINE_THICK
-Line.Visible = false
-Line.ZIndex = 5
-Line.Color = GameConfig.LINE_COLOR
-
-InitVisuals()
-
-game:GetService("RunService").RenderStepped:Connect(function(deltaTime)
-    local now = os.clock()
-
-    if not isrbxactive() then return end
-
-    -- Mise à jour caméra
-    if AutoPlay.enabled then
-        if now - lastCameraUpdate >= 0.25 then
-            lastCameraUpdate = now
-            local camera = workspace.CurrentCamera
-            if camera then
-                CameraScale = camera.ViewportSize.Y / 1080
-            end
-        end
-
-        -- Vérification GUI
-        if now - lastGuiCheck >= 0.5 then
-            lastGuiCheck = now
-            if guiVisible then
-                if IsGuiVisible() then
-                    guiVisible = false
-                    ClearVisuals()
-                    ResetState()
-                end
-            else
-                if not UpdateLanes() then
-                    guiVisible = true
-                end
-            end
-        end
-
-        -- Dessin de la ligne ESP
-        if AutoPlay.showESP and LaneData then
-            Line.Thickness = GameConfig.LINE_THICK * CameraScale
-            Line.Visible = true
-            -- (Logique de dessin entre les lanes)
-        end
-
-        -- Nettoyer les visuels
-        for lane = 1, 4 do
-            for i = 1, GameConfig.MAX_CIRCLES do
-                Circles[lane][i].Visible = false
-                Tails[lane][i].Visible = false
-            end
-        end
-
-        -- Relâcher les touches si nécessaire
-        for lane = 1, AutoPlay.activeLaneCount do
-            local key = AutoPlay.currentKeys[lane]
-            if KeyState[lane] and now >= KeyReleaseTime[lane] then
-                keyrelease(key)
-                KeyState[lane] = false
-            end
-        end
-
-        -- Récupérer toutes les notes actives
-        local notesByLane = { {}, {}, {}, {} }
-        local allNotes = SafeCall(function() return GameUI and GameUI:GetChildren() end)
-        
-        if allNotes then
-            for _, note in pairs(allNotes) do
-                if SafeCall(function() return note.ClassName end) ~= "Frame" then continue end
-                if SafeCall(function() return note.Name end) ~= DecodeString(47) then continue end
-                
-                local noteVisual = SafeCall(function() return note:FindFirstChild(DecodeString(48)) end)
-                if not noteVisual then continue end
-                
-                local pos = SafeCall(function() return noteVisual.AbsolutePosition end)
-                local size = SafeCall(function() return noteVisual.AbsoluteSize end)
-                if not pos or not size then continue end
-                
-                local noteX = pos.X + size.X / 2
-                local noteY = pos.Y + size.Y / 2
-                
-                -- Trouver la lane la plus proche
-                local closestLane = nil
-                local closestDist = math.huge
-                for laneIdx = 1, AutoPlay.activeLaneCount do
-                    if not LaneData[laneIdx] then continue end
-                    local dist = math.abs(noteX - LaneData[laneIdx].cx)
-                    if dist < closestDist then
-                        closestDist = dist
-                        closestLane = laneIdx
-                    end
-                end
-                
-                if not closestLane or closestDist > GameConfig.MIN_DIST_X then continue end
-                
-                -- Vérifier si déjà traitée
-                local laneNotes = HitNotes[closestLane]
-                if laneNotes[note] then
-                    if not SafeCall(function() return note.Parent end) then
-                        laneNotes[note] = nil
-                    end
-                    continue
-                end
-                
-                local hitY = LaneData[closestLane].hitY
-                local distToHit = noteY - hitY
-                
-                if distToHit > GameConfig.PAST_CATCH then
-                    laneNotes[note] = true
-                    continue
-                end
-                
-                if distToHit < -GameConfig.APPROACH_DIST then continue end
-                
-                -- Vérifier si c'est une hold note
-                local holdVisual = SafeCall(function() return note:FindFirstChild(DecodeString(49)) end)
-                local holdHeight = holdVisual and SafeCall(function() return holdVisual.AbsoluteSize.Y end) or 0
-                local isHold = holdHeight > GameConfig.HOLD_MIN_H
-                
-                notesByLane[closestLane][#notesByLane[closestLane] + 1] = {
-                    note = note,
-                    headCY = noteY,
-                    dist = distToHit,
-                    isHold = isHold,
-                    tailH = holdHeight
-                }
-            end
-        end
-
-        -- Traiter chaque lane
-        for lane = 1, AutoPlay.activeLaneCount do
-            local key = AutoPlay.currentKeys[lane]
-            if not LaneData[lane] then continue end
-            
-            local laneX = LaneData[lane].cx
-            local laneNotes = notesByLane[lane]
-            local hitTable = HitNotes[lane]
-            
-            -- Trier par position Y (les plus basses en premier)
-            table.sort(laneNotes, function(a, b) return a.headCY < b.headCY end)
-            
-            for i = 1, #laneNotes do
-                if i > GameConfig.MAX_CIRCLES then break end
-                
-                local noteData = laneNotes[i]
-                local inRange = noteData.dist >= -GameConfig.TOUCH_DIST and noteData.dist <= GameConfig.PAST_CATCH
-                
-                -- Dessin ESP
-                if AutoPlay.showESP then
-                    local circle = Circles[lane][i]
-                    local tail = Tails[lane][i]
-                    local color
-                    
-                    if inRange then
-                        color = GameConfig.COLOR_ON_LINE
-                    elseif noteData.dist < -GameConfig.TOUCH_DIST then
-                        -- Interpolation pour couleur d'approche
-                        local lerp = 1 - math.abs(noteData.dist) / GameConfig.APPROACH_DIST
-                        local r = GameConfig.COLOR_APPROACH.R + (GameConfig.LANE_COLORS[lane].R - GameConfig.COLOR_APPROACH.R) * lerp
-                        local g = GameConfig.COLOR_APPROACH.G + (GameConfig.LANE_COLORS[lane].G - GameConfig.COLOR_APPROACH.G) * lerp
-                        local b = GameConfig.COLOR_APPROACH.B + (GameConfig.LANE_COLORS[lane].B - GameConfig.COLOR_APPROACH.B) * lerp
-                        color = Color3.new(r, g, b)
-                    else
-                        color = noteData.isHold and GameConfig.COLOR_HOLD or GameConfig.LANE_COLORS[lane]
-                    end
-                    
-                    circle.Color = color
-                    circle.Radius = GameConfig.CIRCLE_RADIUS * CameraScale
-                    circle.Thickness = GameConfig.CIRCLE_THICK * CameraScale
-                    circle.Filled = noteData.isHold and not inRange
-                    circle.Position = Vector2.new(laneX, noteData.headCY)
-                    circle.Visible = true
-                    
-                    if noteData.isHold and noteData.tailH > 0 then
-                        tail.From = Vector2.new(laneX, noteData.headCY)
-                        tail.To = Vector2.new(laneX, noteData.headCY - noteData.tailH)
-                        tail.Thickness = GameConfig.TAIL_THICK * CameraScale
-                        tail.Color = color
-                        tail.Visible = true
-                    end
-                end
-                
-                -- Appuyer sur la touche
-                if inRange and not KeyState[lane] and not hitTable[noteData.note] then
-                    hitTable[noteData.note] = true
-                    
-                    if noteData.isHold then
-                        keypress(key)
-                        hitTable[noteData.note] = {
-                            inst = noteData.note,
-                            tailH = noteData.tailH
-                        }
-                        LastNoteTime[lane] = now
-                    else
-                        keypress(key)
-                        KeyState[lane] = true
-                        KeyReleaseTime[lane] = now + GameConfig.TAP_HOLD_SEC
-                    end
-                    break
-                end
-            end
-        end
-        
-        -- Nettoyer les notes hold terminées
-        for lane = 1, AutoPlay.activeLaneCount do
-            local key = AutoPlay.currentKeys[lane]
-            if KeyState[lane] and now >= KeyReleaseTime[lane] then
-                keyrelease(key)
-                KeyState[lane] = false
-            end
-            
-            local heldNote = hitTable[lane] -- Simplification
-            if heldNote and type(heldNote) == "table" and heldNote.inst then
-                local stillValid = SafeCall(function() return heldNote.inst.Parent end)
-                local holdVisual = heldNote.inst and SafeCall(function() 
-                    return heldNote.inst:FindFirstChild(DecodeString(45)) 
-                end)
-                local holdHeight = holdVisual and SafeCall(function() return holdVisual.AbsoluteSize.Y end) or 0
-                local currentY = SafeCall(function() 
-                    local v = heldNote.inst:FindFirstChild(DecodeString(44))
-                    return v and v.AbsolutePosition.Y + v.AbsoluteSize.Y / 2
-                end)
-                local hitY = LaneData[lane].hitY
-                
-                if holdHeight < 5 or (currentY and currentY - holdHeight >= hitY) then
-                    keyrelease(key)
-                    hitTable[lane] = nil
-                    LastNoteTime[lane] = 0
-                end
-            end
-        end
-    elseif not AutoPlay.enabled then
-        ClearVisuals()
-    end
-
-    -- ==========================================
-    -- AUTO SHOOT LOGIC
-    -- ==========================================
-    
-    if AutoShoot.enabled then
-        local target = GetTarget()
-        local targetGui = target and SafeCall(function() return target:FindFirstChild(DecodeString(50)) end)
-        
-        if not target or not targetGui then
-            if AutoShoot.shotState ~= "idle" then
-                print(string.format(DecodeString(52), AutoShoot.shotCount))
-                AutoShoot.shotState = "idle"
+    if now - lastLaneRefresh >= LANE_REFRESH_INTERVAL then
+        lastLaneRefresh = now
+        if lanesValid then
+            if isRhythmUIGone() then
+                lanesValid = false
+                hideESP()
+                releaseAllKeys()
             end
         else
-            local chargePercent = GetChargePercent(targetGui)
-            
-            if chargePercent then
-                if AutoShoot.shotState == "idle" then
-                    if chargePercent > 0.95 then
-                        AutoShoot.shotState = "charging"
-                        AutoShoot.shotStartTime = now
-                        AutoShoot.shotCount = AutoShoot.shotCount + 1
-                        print(string.format(DecodeString(56), AutoShoot.shotCount, chargePercent * 100))
-                    end
-                elseif AutoShoot.shotState == "charging" then
-                    if chargePercent <= AutoShoot.RELEASE_TARGET then
-                        AutoShoot.shotState = "released"
-                        print(string.format(DecodeString(59), AutoShoot.shotCount, chargePercent * 100, AutoShoot.RELEASE_TARGET * 100))
-                        keyrelease(AutoShoot.SHOOT_KEY)
-                    elseif chargePercent <= 0.01 then
-                        print(string.format(DecodeString(60), AutoShoot.shotCount, chargePercent * 100))
-                        keyrelease(AutoShoot.SHOOT_KEY)
-                        AutoShoot.shotState = "timeout"
-                    elseif now - AutoShoot.shotStartTime > 3 then
-                        print(string.format(DecodeString(62), AutoShoot.shotCount, chargePercent * 100))
-                        keyrelease(AutoShoot.SHOOT_KEY)
-                        AutoShoot.shotState = "timeout"
+            refreshLanes()
+        end
+    end
+    if not lanesValid or not laneData then
+        return
+    end
+    if SHOW_ESP and SHOW_HIT_LINE then
+        hitLine.Thickness = CONFIG.LINE_THICK * espScale
+        hitLine.Visible = true
+    else
+        hitLine.Visible = false
+    end
+    for lane = 1, 4 do
+        for i = 1, CONFIG.MAX_CIRCLES do
+            circles[lane][i].Visible = false
+            tails[lane][i].Visible = false
+        end
+    end
+    for lane = 1, ACTIVE_LANE_COUNT do
+        if not isLaneEnabled(lane) then
+            continue
+        end
+        local key = CURRENT_KEYS[lane]
+        if tapHeld[lane] and now >= tapReleaseAt[lane] then
+            keyrelease(key)
+            tapHeld[lane] = false
+        end
+        if holdActive[lane] then
+            local hold = holdActive[lane]
+            local invalid = false
+            local parent = safeCall(function()
+                return hold.inst.Parent
+            end)
+            if not parent then
+                invalid = true
+            else
+                local head = safeCall(function()
+                    return hold.inst:FindFirstChild("Head")
+                end)
+                if not head then
+                    invalid = true
+                else
+                    local headPos = safeCall(function()
+                        return head.AbsolutePosition
+                    end)
+                    local headSize = safeCall(function()
+                        return head.AbsoluteSize
+                    end)
+                    if not headPos or not headSize then
+                        invalid = true
+                    else
+                        local headY = headPos.Y + headSize.Y / 2
+                        local tail = safeCall(function()
+                            return hold.inst:FindFirstChild("Tail")
+                        end)
+                        local tailH = tail and safeCall(function()
+                            return tail.AbsoluteSize.Y
+                        end) or 0
+                        local catchY = laneData[lane].hitY
+                        if tailH < 2 or headY - tailH >= catchY then
+                            invalid = true
+                        end
                     end
                 end
             end
+            if invalid then
+                keyrelease(key)
+                holdActive[lane] = nil
+                holdStartAt[lane] = 0
+            end
         end
     end
+    cleanupStaleNotes()
+    local children = safeCall(function()
+        return notesContainer:GetChildren()
+    end)
+    if not children then
+        return
+    end
+    local notesByLane = {
+        {},
+        {},
+        {},
+        {},
+    }
+    for _, note in ipairs(children) do
+        if safeCall(function()
+            return note.ClassName
+        end) ~= "Frame" then
+            continue
+        end
+        if safeCall(function()
+            return note.Name
+        end) ~= "NoteTemplate" then
+            continue
+        end
+        local head = safeCall(function()
+            return note:FindFirstChild("Head")
+        end)
+        if not head then
+            continue
+        end
+        local headPos = safeCall(function()
+            return head.AbsolutePosition
+        end)
+        local headSize = safeCall(function()
+            return head.AbsoluteSize
+        end)
+        if not headPos or not headSize then
+            continue
+        end
+        local headCX = headPos.X + headSize.X / 2
+        local headCY = headPos.Y + headSize.Y / 2
+        local nearestLane = nil
+        local nearestDist = math.huge
+        for lane = 1, ACTIVE_LANE_COUNT do
+            if not laneData[lane] or not isLaneEnabled(lane) then
+                continue
+            end
+            local dist = math.abs(headCX - laneData[lane].cx)
+            if dist < nearestDist then
+                nearestDist = dist
+                nearestLane = lane
+            end
+        end
+        if not nearestLane or nearestDist > CONFIG.MIN_DIST_X then
+            continue
+        end
+        local laneNotes = seenNotes[nearestLane]
+        if laneNotes[note] then
+            if not safeCall(function()
+                return note.Parent
+            end) then
+                laneNotes[note] = nil
+            end
+            continue
+        end
+        local catchY = laneData[nearestLane].hitY
+        local distToLine = headCY - catchY
+        if distToLine > CONFIG.PAST_CATCH then
+            laneNotes[note] = true
+            continue
+        end
+        if distToLine < - CONFIG.APPROACH_DIST then
+            continue
+        end
+        local tail = safeCall(function()
+            return note:FindFirstChild("Tail")
+        end)
+        local tailH = tail and safeCall(function()
+            return tail.AbsoluteSize.Y
+        end) or 0
+        local isHold = tailH > CONFIG.HOLD_MIN_H
+        table.insert(notesByLane[nearestLane], {
+            note = note,
+            headCY = headCY,
+            dist = distToLine,
+            isHold = isHold,
+            tailH = tailH,
+        })
+    end
+    for lane = 1, ACTIVE_LANE_COUNT do
+        if not isLaneEnabled(lane) then
+            continue
+        end
+        local key = CURRENT_KEYS[lane]
+        if not laneData[lane] then
+            continue
+        end
+        local laneCX = laneData[lane].cx
+        local laneNotes = notesByLane[lane]
+        local seen = seenNotes[lane]
+        table.sort(laneNotes, function(a, b)
+            return a.headCY < b.headCY
+        end)
+        for i, noteInfo in ipairs(laneNotes) do
+            if i > CONFIG.MAX_CIRCLES then
+                break
+            end
+            local onLine = noteInfo.dist >= - CONFIG.TOUCH_DIST and noteInfo.dist <= CONFIG.PAST_CATCH
+            if SHOW_ESP then
+                local circle = circles[lane][i]
+                local tail = tails[lane][i]
+                local color
+                if onLine then
+                    color = CONFIG.COLOR_ON_LINE
+                elseif noteInfo.dist < - CONFIG.TOUCH_DIST then
+                    local t = 1 - math.abs(noteInfo.dist) / CONFIG.APPROACH_DIST
+                    local laneColor = CONFIG.LANE_COLORS[lane]
+                    color = Color3.new(
+						CONFIG.COLOR_APPROACH.R + (laneColor.R - CONFIG.COLOR_APPROACH.R) * t, CONFIG.COLOR_APPROACH.G + (laneColor.G - CONFIG.COLOR_APPROACH.G) * t, CONFIG.COLOR_APPROACH.B + (laneColor.B - CONFIG.COLOR_APPROACH.B) * t)
+                else
+                    color = noteInfo.isHold and CONFIG.COLOR_HOLD or CONFIG.LANE_COLORS[lane]
+                end
+                if SHOW_CIRCLES then
+                    circle.Color = color
+                    circle.Radius = CONFIG.CIRCLE_RADIUS * espScale
+                    circle.Thickness = CONFIG.CIRCLE_THICK * espScale
+                    circle.Filled = noteInfo.isHold and not onLine
+                    circle.Position = Vector2.new(laneCX, noteInfo.headCY)
+                    circle.Visible = true
+                end
+                if SHOW_HOLD_TAILS and noteInfo.isHold and noteInfo.tailH > 0 then
+                    tail.From = Vector2.new(laneCX, noteInfo.headCY)
+                    tail.To = Vector2.new(laneCX, noteInfo.headCY - noteInfo.tailH)
+                    tail.Thickness = CONFIG.TAIL_THICK * espScale
+                    tail.Color = color
+                    tail.Visible = true
+                end
+            end
+            if onLine and not tapHeld[lane] and not holdActive[lane] then
+                seen[noteInfo.note] = true
+                if noteInfo.isHold then
+                    keypress(key)
+                    holdActive[lane] = {
+                        inst = noteInfo.note,
+                        tailH = noteInfo.tailH,
+                    }
+                    holdStartAt[lane] = now
+                else
+                    keypress(key)
+                    tapHeld[lane] = true
+                    tapReleaseAt[lane] = now + CONFIG.TAP_HOLD_SEC
+                end
+                break
+            end
+        end
+    end
+end
+
+--// STATE
+local autoplayToggle
+local autoGreenToggle
+local function setAutoplayEnabled(value)
+    AUTOPLAY_ENABLED = value == true
+    if not AUTOPLAY_ENABLED then
+        releaseAllKeys()
+        hideESP()
+        lanesValid = false
+    end
+end
+local function setShowESP(value)
+    SHOW_ESP = value == true
+    if not SHOW_ESP then
+        hideESP()
+    end
+end
+local function setAutoGreenEnabled(value)
+    AUTO_GREEN_ENABLED = value == true
+    if not AUTO_GREEN_ENABLED and shotState ~= "idle" then
+        keyrelease(SHOOT_KEY)
+        shotState = "idle"
+    end
+end
+
+--// CLEANUP
+_G.Gakuran_Cleanup = function()
+    releaseAllKeys()
+    hideESP()
+    clearDrawings()
+    lanesValid = false
+    laneData = nil
+    notesContainer = nil
+    shotState = "idle"
+end
+if _G.Gakuran_Running then
+    _G.Gakuran_Running = false
+    if _G.Gakuran_Cleanup then
+        pcall(_G.Gakuran_Cleanup)
+    end
+    task.wait(0.1)
+end
+_G.Gakuran_Running = true
+
+--// LOAD UI
+local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/neaxusxgod-png/INS-ui/main/uilib.min.lua"))() or INSui
+local win = Lib:CreateWindow({
+    title = "Novaa - v1.0.0",
+    subtitle = "auto",
+    logo = "https://raw.githubusercontent.com/KaysiRB/Novaa-Matcha/main/Utils/Logos/Stellar.png",
+    menuKey = "LeftControl",
+    configName = "Gakuran",
+    configFolder = "Novaa",
+    autoSave = true,
+    font = "Minecraft",
+    size = Vector2.new(700, 540),
+    opacity = 98,
+    keybindOverlay = false,
+    smartFps = false,
+    checkboxStyle = true,
+})
+Lib:ApplyThemePreset("Waifu")
+win:AddSettingsTab("gear")
+Lib:Notify("Novaa", "Press LeftControl to toggle the menu", 4, "info")
+Lib:Category("Games")
+
+--// GAME INFO
+local gameInfoTab = win:Tab("Game", "gamepad")
+local gameInfo = gameInfoTab:Section("Game Info", "Full", "Information about the current game")
+gameInfo:Label("Game: " .. getgamename())
+gameInfo:Label("Place: " .. game.Name)
+gameInfo:Label("GameID: " .. game.GameId)
+gameInfo:Label("PlaceID: " .. game.PlaceId)
+gameInfo:Label("JobID: " .. game.JobId)
+
+--// AUTOPLAY
+local autoplayTab = win:Tab("Autoplay", "sparkles")
+local autoplaySection = autoplayTab:Section("Gakuran Autoplay", "Full", "Automatic rhythm note inputs and visual overlay")
+autoplayToggle = autoplaySection:Toggle("Enabled", AUTOPLAY_ENABLED, function(value)
+    setAutoplayEnabled(value)
+    Lib:Notify("Gakuran Autoplay", AUTOPLAY_ENABLED and "Enabled" or "Disabled", 2, AUTOPLAY_ENABLED and "success" or "warning")
+end)
+autoplayToggle:AddKeybind("P", "Toggle")
+autoplaySection:Divider("Visuals")
+autoplaySection:Toggle("Show ESP", SHOW_ESP, function(value)
+    setShowESP(value)
+end)
+autoplaySection:Toggle("Hit line", SHOW_HIT_LINE, function(value)
+    SHOW_HIT_LINE = value
+    if not SHOW_HIT_LINE then
+        hitLine.Visible = false
+    end
+end)
+autoplaySection:Toggle("Note circles", SHOW_CIRCLES, function(value)
+    SHOW_CIRCLES = value
+end)
+autoplaySection:Toggle("Hold tails", SHOW_HOLD_TAILS, function(value)
+    SHOW_HOLD_TAILS = value
+end)
+autoplaySection:Slider("Circle radius", CONFIG.CIRCLE_RADIUS, 1, 5, 50, " px", function(value)
+    CONFIG.CIRCLE_RADIUS = value
+end)
+autoplaySection:Slider("Line thickness", CONFIG.LINE_THICK, 1, 1, 10, " px", function(value)
+    CONFIG.LINE_THICK = value
+end)
+autoplaySection:Slider("Max notes shown", CONFIG.MAX_CIRCLES, 1, 1, 16, "", function(value)
+    CONFIG.MAX_CIRCLES = math.floor(value)
+end)
+autoplaySection:Divider("Timing")
+autoplaySection:Slider("Tap hold duration", CONFIG.TAP_HOLD_SEC * 1000, 1, 10, 200, " ms", function(value)
+    CONFIG.TAP_HOLD_SEC = value / 1000
+end)
+autoplaySection:Slider("Touch distance", CONFIG.TOUCH_DIST, 1, 5, 80, " px", function(value)
+    CONFIG.TOUCH_DIST = value
+end)
+autoplaySection:Slider("Past catch window", CONFIG.PAST_CATCH, 1, 5, 80, " px", function(value)
+    CONFIG.PAST_CATCH = value
+end)
+autoplaySection:Slider("Approach distance", CONFIG.APPROACH_DIST, 10, 50, 600, " px", function(value)
+    CONFIG.APPROACH_DIST = value
+end)
+autoplaySection:Slider("Lane match tolerance", CONFIG.MIN_DIST_X, 5, 25, 250, " px", function(value)
+    CONFIG.MIN_DIST_X = value
+end)
+autoplaySection:Slider("Hold min height", CONFIG.HOLD_MIN_H, 1, 5, 80, " px", function(value)
+    CONFIG.HOLD_MIN_H = value
+end)
+autoplaySection:Slider("Lane refresh rate", LANE_REFRESH_INTERVAL * 1000, 50, 100, 2000, " ms", function(value)
+    LANE_REFRESH_INTERVAL = value / 1000
+end)
+autoplaySection:Divider("Lanes")
+autoplaySection:Toggle("Auto-detect lane count", AUTO_DETECT_LANES, function(value)
+    AUTO_DETECT_LANES = value
+    lanesValid = false
+end)
+for lane = 1, 4 do
+    autoplaySection:Toggle("Lane " .. lane, LANE_ENABLED[lane], function(value)
+        LANE_ENABLED[lane] = value
+        if not value and tapHeld[lane] then
+            keyrelease(CURRENT_KEYS[lane])
+            tapHeld[lane] = false
+        end
+        if not value and holdActive[lane] then
+            keyrelease(CURRENT_KEYS[lane])
+            holdActive[lane] = nil
+        end
+    end)
+end
+
+--// AUTO-GREEN
+local autoGreenTab = win:Tab("Auto-Green", "target")
+local autoGreenSection = autoGreenTab:Section("Gakuran Auto-Green", "Full", "Automatic perfect basketball shot timing")
+autoGreenToggle = autoGreenSection:Toggle("Enabled", AUTO_GREEN_ENABLED, function(value)
+    setAutoGreenEnabled(value)
+    Lib:Notify("Gakuran Auto-Green", AUTO_GREEN_ENABLED and "Enabled" or "Disabled", 2, AUTO_GREEN_ENABLED and "success" or "warning")
+end)
+autoGreenToggle:AddKeybind("G", "Toggle")
+autoGreenSection:Slider("Release target %", RELEASE_TARGET * 100, 0.1, 10, 80, "%", function(value)
+    RELEASE_TARGET = value / 100
+    Lib:Notify("Auto-Green", "Release target: " .. value .. "%", 2, "info")
+end)
+autoGreenSection:Slider("Detect threshold %", DETECT_THRESHOLD * 100, 0.5, 80, 99, "%", function(value)
+    DETECT_THRESHOLD = value / 100
+end)
+autoGreenSection:Slider("Shot timeout", SHOT_TIMEOUT, 0.5, 1, 8, " s", function(value)
+    SHOT_TIMEOUT = value
+end)
+autoGreenSection:Slider("Shoot key code", SHOOT_KEY, 1, 65, 90, "", function(value)
+    SHOOT_KEY = math.floor(value)
+end)
+autoGreenSection:Info("The release target % controls when the shot is released.\n\n" .. "Slide UP = releases earlier (higher %)\n" .. "Slide DOWN = releases later (lower %)\n\n" .. "Different in-game heights may need slight adjustments to hit 100% perfects consistently. " .. "Start around 27-28% and tweak from there.")
+
+--// GAME SETTINGS
+local gameSettingsTab = win:Tab("Game Settings", "cog")
+local rhythmColors = gameSettingsTab:Section("Gakuran Colors", "Full", "Autoplay visual colors")
+rhythmColors:Colorpicker("Hit line", CONFIG.LINE_COLOR, function(color)
+    CONFIG.LINE_COLOR = color
+    hitLine.Color = color
+end)
+rhythmColors:Colorpicker("Circle", CONFIG.LANE_COLORS[1], function(color)
+    CONFIG.LANE_COLORS[1] = color
+    CONFIG.LANE_COLORS[2] = color
+    CONFIG.LANE_COLORS[3] = color
+    CONFIG.LANE_COLORS[4] = color
+end)
+rhythmColors:Colorpicker("Hold note", CONFIG.COLOR_HOLD, function(color)
+    CONFIG.COLOR_HOLD = color
+end)
+rhythmColors:Colorpicker("On-line note", CONFIG.COLOR_ON_LINE, function(color)
+    CONFIG.COLOR_ON_LINE = color
+end)
+rhythmColors:Colorpicker("Approach note", CONFIG.COLOR_APPROACH, function(color)
+    CONFIG.COLOR_APPROACH = color
+end)
+rhythmColors:Divider("Per-lane colors")
+for lane = 1, 4 do
+    rhythmColors:Colorpicker("Lane " .. lane, CONFIG.LANE_COLORS[lane], function(color)
+        CONFIG.LANE_COLORS[lane] = color
+    end)
+end
+local rhythmAdvanced = gameSettingsTab:Section("Gakuran Advanced", "Full", "Miscellaneous script behavior")
+rhythmAdvanced:Toggle("Require game focus", REQUIRE_GAME_FOCUS, function(value)
+    REQUIRE_GAME_FOCUS = value
+end)
+rhythmAdvanced:Toggle("Debug logging", DEBUG_LOGGING, function(value)
+    DEBUG_LOGGING = value
+end)
+rhythmAdvanced:Slider("Circle thickness", CONFIG.CIRCLE_THICK, 1, 1, 8, " px", function(value)
+    CONFIG.CIRCLE_THICK = value
+end)
+rhythmAdvanced:Slider("Tail thickness", CONFIG.TAIL_THICK, 1, 1, 12, " px", function(value)
+    CONFIG.TAIL_THICK = value
+end)
+Lib:Category("Universal")
+
+--// VISUALS
+local visuals = win:Tab("Visuals", "eye")
+local universalVisuals = visuals:Section("Universal Visuals", "Full", "Features shared between supported games")
+universalVisuals:Info("Universal visual features will be added here.")
+universalVisuals:Toggle("Watermark", false)
+universalVisuals:Toggle("FPS counter", false)
+
+--// PLAYER
+local playerTab = win:Tab("Player", "user")
+local movement = playerTab:Section("Movement", "Full", "Universal player settings")
+movement:Info("Universal movement features will be added here.")
+
+--// MISC
+local misc = win:Tab("Misc", "three-dots-horizontal")
+local utilities = misc:Section("Utilities", "Full")
+utilities:Button("Refresh lanes", function()
+    lanesValid = false
+    refreshLanes()
+    Lib:Notify("Novaa", "Lanes refreshed", 1, "success")
+end)
+utilities:Button("Release all keys", function()
+    releaseAllKeys()
+    Lib:Notify("Novaa", "All keys released", 1, "success")
+end)
+utilities:Button("Reset shot counter", function()
+    shotCount = 0
+    shotState = "idle"
+    Lib:Notify("Novaa", "Shot counter reset", 1, "success")
+end)
+utilities
+	:Button("Unload", function()
+    Lib:Dialog({
+        title = "Unload Novaa?",
+        text = "This will remove all drawings and close the UI.",
+        confirm = "Unload",
+        onConfirm = function()
+            _G.Gakuran_Running = false
+            if renderConnection then
+                renderConnection:Disconnect()
+                renderConnection = nil
+            end
+            if _G.Gakuran_Cleanup then
+                _G.Gakuran_Cleanup()
+            end
+            Lib:Destroy()
+        end,
+    })
+end)
+	:SetRisk()
+
+--// MAIN LOOP
+local renderConnection
+renderConnection = RunService.RenderStepped:Connect(function()
+    if not _G.Gakuran_Running then
+        if renderConnection then
+            renderConnection:Disconnect()
+            renderConnection = nil
+        end
+        if _G.Gakuran_Cleanup then
+            _G.Gakuran_Cleanup()
+        end
+        return
+    end
+    if REQUIRE_GAME_FOCUS and not isrbxactive() then
+        return
+    end
+    local now = os.clock()
+    updateAutoplay(now)
+    updateAutoGreen(now)
 end)
 
--- Notification de chargement
-pcall(function()
-    notify(DecodeString(31))
-end)
-
-print(DecodeString(1))
+--// LOAD CONFIG LAST
+win:autoloadConfig("Gakuran")
+Lib:Notify("Loaded", "Novaa script is ready!", 3, "success")

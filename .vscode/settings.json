@@ -2,5 +2,11 @@
     "editor.tokenColorCustomizations": {
         "comments": "",
         "textMateRules": []
-    }
+    },
+    "[luau]": {
+        "editor.defaultFormatter": "JohnnyMorganz.stylua"
+    },
+    "[lua]": {
+        "editor.defaultFormatter": "JohnnyMorganz.stylua"
+    },
 }
