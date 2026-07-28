@@ -35,23 +35,31 @@ end
 
 -- Register exact game IDs here. No object heuristics are used.
 local GAMES = {
-    [142823291] = {
-        Name = "Murder Mystery 2",
-        Module = "Games/MM2.lua",
-    },
-    -- [YOUR_CASE_PLACE_ID] = {
+    -- [YOUR_CASE_GAME_ID] = {
     --     Name = "Case Unboxing",
-    --     Module = "Novaa/Games/Case-Unboxing.lua",
+    --     Module = "Novaa/Games/Case-Unboxing.luau",
     -- },
+    [66654135] = {
+        Name = "Murder Mystery 2",
+        Module = "Games/MM2.luau",s
+    },
+    [2298998220] = {
+        Name = "Nothingness",
+        Module = "Games/MM2.luau",
+    },
+    [9199655655] = {
+        Name = "Gakuran",
+        Module = "Games/Gakuran.luau",
+    },
 }
 
-local placeId = getPlaceId()
-local gameInfo = GAMES[placeId]
+local gameId = game.GameId
+local gameInfo = GAMES[gameId]
 local loadedModule
 
 local function startGameModule()
     if not gameInfo then
-        log("No module registered for PlaceId " .. tostring(placeId))
+        log("No module registered for GameId " .. tostring(gameId))
         return false
     end
     if loadedModule then return true end
@@ -75,8 +83,8 @@ local function startGameModule()
     return true
 end
 
-local placeText = "PlaceId: " .. tostring(placeId)
-log(placeText)
+local gameIdText = "GameId: " .. tostring(gameId)
+log(gameIdText)
 log(gameInfo and ("Detected game: " .. gameInfo.Name) or "Unknown game")
 
 startGameModule()
