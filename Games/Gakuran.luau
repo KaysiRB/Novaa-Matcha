@@ -482,7 +482,7 @@ RunService.RenderStepped:Connect(function(deltaTime)
 								color = Constants.COLOR_ON_LINE
 							elseif noteData.dist < -Constants.TOUCH_DIST then
 								local percent = 1 - math.abs(noteData.dist) / Constants.APPROACH_DIST
-								color = Constants.COLOR_APPROACH:Lerp(Constants.LANE_COLORS[lane], percent)
+								color = Color3.new(Constants.COLOR_APPROACH.R + (Constants.LANE_COLORS[lane].R - Constants.COLOR_APPROACH.R) * percent, Constants.COLOR_APPROACH.G + (Constants.LANE_COLORS[lane].G - Constants.COLOR_APPROACH.G) * percent, Constants.COLOR_APPROACH.B + (Constants.LANE_COLORS[lane].B - Constants.COLOR_APPROACH.B) * percent)
 							else
 								color = noteData.isHold and Constants.COLOR_HOLD or Constants.LANE_COLORS[lane]
 							end
