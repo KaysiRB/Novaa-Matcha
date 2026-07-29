@@ -2,304 +2,407 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
+local LocalCharacter = LocalPlayer.Character
 local UIS = game:GetService("UserInputService")
 
 --// AUTO PARRY IMPORTS
 local ImportESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/artxficial/matchastuff/main/esp_utility.lua"))()
 local ImportAnimationTracker = loadstring(game:HttpGet("https://raw.githubusercontent.com/artxficial/matchastuff/main/animationtracker.lua"))()
 
---// AUTO PARRY SETTINGS
-local AUTO_PARRY_ENABLED = true
-local AUTO_DODGE_ENABLED = true
-local AUTO_TARGET_NEAREST = false
-local MULTI_TARGET = true
-local TARGET_FACING_YOU = false
-local YOU_FACING_TARGET = true
-local DEBUG_PARRY = false
-local INCLUDE_LOCAL_CHARACTER = false
-local AUTO_PARRY_RANGE = 10
-local MAX_CYCLE_RANGE = 20
-local PARRY_WINDOW = 0.06
-local PROBABILITY_TO_PARRY = 100
-local DEFAULT_REACTION_TIME = 0.1
-local PARRY_OFFSET = 0
-local BLOCK_HOLD_TIME = 0.4
-local PARRY_DISTANCE = 15
-local SelectedFolder = nil
+--// AUTO PARRY GAME Config.AUTOPLAY_CONFIG
+local Config = {
+    --// AUTO PARRY SETTINGS
+    AUTO_PARRY_ENABLED = true,
+    AUTO_DODGE_ENABLED = true,
+    AUTO_TARGET_NEAREST = false,
+    MULTI_TARGET = true,
+    TARGET_FACING_YOU = false,
+    YOU_FACING_TARGET = true,
+    DEBUG_PARRY = false,
+    INCLUDE_LOCAL_CHARACTER = false,
+    AUTO_PARRY_RANGE = 10,
+    MAX_CYCLE_RANGE = 20,
+    PARRY_WINDOW = 0.06,
+    PROBABILITY_TO_PARRY = 100,
+    DEFAULT_REACTION_TIME = 0.1,
+    PARRY_OFFSET = 0,
+    BLOCK_HOLD_TIME = 0.4,
+    PARRY_DISTANCE = 15,
+    SelectedFolder = nil,
+    Anims = {
+        ["KarateAnims"] = {
+            ["rbxassetid://137837926745158"] = {
+                DisplayName = "1stM1",
+                ReactionTime = 0.15,
+            },
+            ["rbxassetid://100981571094705"] = {
+                DisplayName = "2ndM1",
+                ReactionTime = 0.15,
+            },
+            ["rbxassetid://130865087635587"] = {
+                DisplayName = "3rdM1",
+                ReactionTime = 0.22,
+            },
+            ["rbxassetid://86495068205420"] = {
+                DisplayName = "4thM1",
+                ReactionTime = 0.22,
+            },
+            ["rbxassetid://120393553812903"] = {
+                DisplayName = "M2",
+                ReactionTime = 0.3,
+            },
+        },
+        ["BasicAnims"] = {
+            ["rbxassetid://83491849294956"] = {
+                DisplayName = "1stM1"
+            },
+            ["rbxassetid://89420531853362"] = {
+                DisplayName = "2ndM1"
+            },
+            ["rbxassetid://83730275893449"] = {
+                DisplayName = "3rdM1"
+            },
+            ["rbxassetid://106980660082799"] = {
+                DisplayName = "4thM1"
+            },
+            ["rbxassetid://78888626472394"] = {
+                DisplayName = "M2",
+                ReactionTime = 0.3,
+            },
+            ["M1Time"] = 0.14,
+        },
+        ["WrestlingAnims"] = {
+            ["rbxassetid://91485623489753"] = {
+                DisplayName = "4thM1",
+                ParryTime = 0.08,
+            },
+            ["rbxassetid://73748315742870"] = {
+                DisplayName = "M2",
+                ReactionTime = 0.3,
+            },
+            ["rbxassetid://82903450925391"] = {
+                DisplayName = "1stM1",
+                ParryTime = 0.08,
+            },
+            ["rbxassetid://119685134442395"] = {
+                DisplayName = "2ndM1",
+                ParryTime = 0.08,
+            },
+            ["rbxassetid://107464726433388"] = {
+                DisplayName = "3rdM1",
+                ParryTime = 0.08,
+            },
+            ["M1Time"] = 0.11,
+        },
+        ["MuayThaiAnims"] = {
+            ["rbxassetid://137034747040618"] = {
+                DisplayName = "M2",
+                ReactionTime = 0.3,
+            },
+            ["rbxassetid://74960202100098"] = {
+                DisplayName = "4thM1",
+                ParryTime = 0.08,
+            },
+            ["rbxassetid://104515319350296"] = {
+                DisplayName = "3rdM1",
+                ParryTime = 0.08,
+            },
+            ["rbxassetid://139911027872047"] = {
+                DisplayName = "2ndM1",
+                ParryTime = 0.08,
+            },
+            ["rbxassetid://96726284968458"] = {
+                DisplayName = "1stM1",
+                ParryTime = 0.08,
+            },
+            ["M1Time"] = 0.1,
+        },
+        ["BoxingAnims"] = {
+            ["rbxassetid://137980914350618"] = {
+                DisplayName = "1stM1",
+                ReactionTime = 0.12,
+            },
+            ["rbxassetid://100408082509740"] = {
+                DisplayName = "2ndM1",
+                ReactionTime = 0.12,
+            },
+            ["rbxassetid://94803478352691"] = {
+                DisplayName = "3rdM1",
+                ReactionTime = 0.15,
+            },
+            ["rbxassetid://78695517680318"] = {
+                DisplayName = "4thM1",
+                ReactionTime = 0.15,
+            },
+            ["rbxassetid://132022052139564"] = {
+                DisplayName = "M2",
+                ParryFunction = function(data)
+                    if data.RegistryData.Processed == true then warn("no") return end
+                    data.RegistryData.Processed = true
+                    task.spawn(function()
+                        print("Boxing parry")
+                        task.wait(.3)
+                        Dodge()
+                        task.wait(.35)
+                        BlockStart(os.clock(), 0.6)
+                    end)
+                end,
+            },
+        },
+        ["HakariAnims"] = {
+            ["rbxassetid://82855179231529"] = {
+                DisplayName = "MomentumM2"
+            },
+            ["rbxassetid://76236532060812"] = {
+                DisplayName = "1stM1",
+                ReactionTime = 0.15,
+            },
+            ["rbxassetid://74206130671324"] = {
+                DisplayName = "2ndM1",
+                ReactionTime = 0.17,
+            },
+            ["rbxassetid://71919935695307"] = {
+                DisplayName = "3rdM1",
+                ReactionTime = 0.15,
+            },
+            ["rbxassetid://122861547142657"] = {
+                DisplayName = "4thM1",
+                ReactionTime = 0.21,
+            },
+            ["rbxassetid://92851992709496"] = {
+                DisplayName = "M2",
+                ReactionTime = 0.35,
+            },
+        },
+        ["CapoeiraAnims"] = {
+            ["rbxassetid://125976167173936"] = {
+                DisplayName = "1stM1",
+                ReactionTime = 0.15,
+            },
+            ["rbxassetid://134945199381140"] = {
+                DisplayName = "2ndM1",
+                ReactionTime = 0.22,
+            },
+            ["rbxassetid://117877243065533"] = {
+                DisplayName = "3rdM1",
+                ReactionTime = 0.16,
+            },
+            ["rbxassetid://106965238908791"] = {
+                DisplayName = "4thM1",
+                ReactionTime = 0.16,
+            },
+            ["rbxassetid://131071815103338"] = {
+                DisplayName = "Whirlwind",
+                ReactionTime = 0.32,
+            }
+        },
+        ["SluggerAnims"] = {
+            ["rbxassetid://134829666925953"] = {
+                DisplayName = "1stM1",
+                ReactionTime = 0.24,
+            },
+            ["rbxassetid://104867156139010"] = {
+                DisplayName = "2ndM1",
+                ReactionTime = 0.22,
+            },
+            ["rbxassetid://112759168172605"] = {
+                DisplayName = "3rdM1",
+                ReactionTime = 0.22
+            },
+            ["rbxassetid://114647502301740"] = {
+                DisplayName = "4thM1",
+                ReactionTime = 0.19,
+            },
+            ["rbxassetid://118943955490014"] = {
+                DisplayName = "M2",
+                ReactionTime = 0.65,
+            }
+        },
+        ["StrikerAnims"] = {
+            ["rbxassetid://127909081017342"] = {
+                DisplayName = "1stM1"
+            },
+            ["rbxassetid://79563637573277"] = {
+                DisplayName = "2ndM1"
+            },
+            ["rbxassetid://118070233153900"] = {
+                DisplayName = "3rdM1"
+            },
+            ["rbxassetid://77710266587706"] = {
+                DisplayName = "4thM1"
+            },
+            ["rbxassetid://114364673509520"] = {
+                DisplayName = "M2"
+            },
+            ["rbxassetid://132840225082238"] = {
+                DisplayName = "1stM1"
+            },
+            ["rbxassetid://88761422474765"] = {
+                DisplayName = "2ndM1"
+            },
+            ["rbxassetid://98462236639320"] = {
+                DisplayName = "3rdM1"
+            },
+            ["rbxassetid://122451562066756"] = {
+                DisplayName = "4thM1"
+            }
+        },
+        ["KureAnims"] = {
+            ["rbxassetid://71676634048602"] = {
+                DisplayName = "4thM1"
+            },
+            ["rbxassetid://102407060635393"] = {
+                DisplayName = "M2",
+                ["ReactionTime"] = 0.01,
+            },
+            ["rbxassetid://82904229252991"] = {
+                DisplayName = "1stM1"
+            },
+            ["rbxassetid://103732110215321"] = {
+                DisplayName = "2ndM1"
+            },
+            ["rbxassetid://103964436023727"] = {
+                DisplayName = "3rdM1"
+            },
+        },
+        ["HakariOtherAnims"] = {
+            ["rbxassetid://126612786608030"] = {
+                DisplayName = "1stM1"
+            },
+            ["rbxassetid://113719263885794"] = {
+                DisplayName = "2ndM1"
+            },
+            ["rbxassetid://136305578634960"] = {
+                DisplayName = "3rdM1"
+            },
+            ["rbxassetid://89039586375625"] = {
+                DisplayName = "4thM1"
+            },
+            ["rbxassetid://82855179231529"] = {
+                DisplayName = "MomentumM2"
+            },
+            ["rbxassetid://101619248052969"] = {
+                DisplayName = "M2"
+            },
+        },
+        IgnoreIds = {73766443218740,111699625251889,85823794654077,83600639547203,99661732639863,106268941365574,109816855387997,122561749929324,129805948180599,90752347516770,135133599113049,132695091086148,137015026151472,114511731321756,122541287927198,80309578200579,100794890036133,109303037515668,117293898907979,74690341409113,73090768467054,72284079162560,92787945841620,89016181362524,76945839486275,101161965631044,80135556847061,128307941333158,85931837451298,91352556581859, 104407197874289,77911299793653,129335968179665, 122384188141033,132695766056641,113331696487725,124220338099067,99799500309776,108636808436488,90015977935891,87932588807124,132477488202815,102982320608759,109278619250401,79971841883936,97783129267001,72822821848529,79974955602012,77798715679680,85845666927963,108862846290180,108045962864902,93184693099565,120399899079666,99958962160522,},
+        ParriedAnimation = {"rbxassetid://100773926241456", "rbxassetid://102823909334302", "rbxassetid://96304721384743", "rbxassetid://82979105739696", "rbxassetid://96600699015093", "rbxassetid://138519505081692"},
+        StunnedAnimation = {"rbxassetid://9598562590", "rbxassetid://9598537410", "rbxassetid://9598551746"},
+        ParryingAnimation = {"rbxassetid://118147060185189"},
 
---// AUTO PARRY GAME CONFIG
-local GameConfig = {
-    ["KarateAnims"] = {
-        ["rbxassetid://137837926745158"] = {
-            DisplayName = "1stM1",
-            ReactionTime = 0.15,
+        --// AUTO PARRY STATE
+        AnimationsLoggedCache = {},
+        AnimationsLoggedOrder = {},
+        AnimationIdSliders = {},
+        pendingTasks = {},
+        ParryKey = string.byte("F"),
+        DodgeKey = string.byte("A"),
+        KeyHeld = false,
+        ReleaseDeadline = 0,
+        Stunned = false,
+        damageLoggerConnection = nil,
+        previousHealth = 100,
+        lastCharacter = nil,
+        TargetCharacters = {},
+        EspTrackers = {},
+        CurrentIndex = 1,
+        COLOR_WHITE = Color3.fromRGB(255, 255, 255),
+        COLOR_RED = Color3.fromRGB(255, 50, 50),
+        COLOR_GREEN = Color3.fromRGB(50, 255, 50),
+        AnimationRegistry = {},
+        LastPendingRegData = nil,
+        InputRegisteredTime = nil,
+        ParryRegisteredTime = nil,
+        InputLatency = 0,
+        DodgeLockoutEnd = 0,
+        StunToken = 0,
+        lastParryAt = 0,
+        animationAddedConnection = nil,
+        inputBeganConnection = nil,
+        orbListenerConnection = nil,
+        ParryState = {
+            IDLE = "idle",
+            INPUT_PENDING = "input_pending",
+            PARRYING = "parrying",
+            PARRYINGFAILED = "parryingfailed",
+            STUNNED = "stunned",
+            WINDOW_EXCEEDED = "window_exceeded",
+            SUCCESS = "parrysuccess",
         },
-        ["rbxassetid://100981571094705"] = {
-            DisplayName = "2ndM1",
-            ReactionTime = 0.15,
+        CurrentParryState = "idle",
+
+        --// AUTOPLAY SETTINGS
+        AUTOPLAY_ENABLED = false,
+        SHOW_ESP = false,
+        SHOW_HIT_LINE = true,
+        SHOW_CIRCLES = true,
+        SHOW_HOLD_TAILS = true,
+        AUTO_DETECT_LANES = true,
+        REQUIRE_GAME_FOCUS = true,
+        DEBUG_LOGGING = false,
+        ACTIVE_LANE_COUNT = 4,
+        CURRENT_KEYS = {88, 67, 78, 77,},
+        LANE_ENABLED = {true, true, true, true},
+        LANE_REFRESH_INTERVAL = 0.5,
+        SCALE_UPDATE_INTERVAL = 0.25,
+        AUTOPLAY_CONFIG = {
+            HOLD_MIN_H = 20,
+            TAP_HOLD_SEC = 0.05,
+            TOUCH_DIST = 30,
+            PAST_CATCH = 30,
+            APPROACH_DIST = 300,
+            MIN_DIST_X = 100,
+            LINE_THICK = 4,
+            CIRCLE_RADIUS = 20,
+            CIRCLE_SIDES = 48,
+            CIRCLE_THICK = 2,
+            TAIL_THICK = 5,
+            MAX_CIRCLES = 8,
+            LANE_COLORS = {
+                Color3.fromRGB(180, 255, 180),
+                Color3.fromRGB(255, 255, 255),
+                Color3.fromRGB(100, 220, 100),
+                Color3.fromRGB(60, 180, 60),
+            },
+            COLOR_ON_LINE = Color3.fromRGB(255, 255, 255),
+            COLOR_HOLD = Color3.fromRGB(150, 255, 150),
+            COLOR_APPROACH = Color3.fromRGB(100, 130, 100),
+            LINE_COLOR = Color3.fromRGB(255, 255, 255),
         },
-        ["rbxassetid://130865087635587"] = {
-            DisplayName = "3rdM1",
-            ReactionTime = 0.22,
-        },
-        ["rbxassetid://86495068205420"] = {
-            DisplayName = "4thM1",
-            ReactionTime = 0.22,
-        },
-        ["rbxassetid://120393553812903"] = {
-            DisplayName = "M2",
-            ReactionTime = 0.3,
-        },
-    },
-    ["BasicAnims"] = {
-        ["rbxassetid://83491849294956"] = {
-            DisplayName = "1stM1"
-        },
-        ["rbxassetid://89420531853362"] = {
-            DisplayName = "2ndM1"
-        },
-        ["rbxassetid://83730275893449"] = {
-            DisplayName = "3rdM1"
-        },
-        ["rbxassetid://106980660082799"] = {
-            DisplayName = "4thM1"
-        },
-        ["rbxassetid://78888626472394"] = {
-            DisplayName = "M2",
-            ReactionTime = 0.3,
-        },
-        ["M1Time"] = 0.14,
-    },
-    ["WrestlingAnims"] = {
-        ["rbxassetid://91485623489753"] = {
-            DisplayName = "4thM1",
-            ParryTime = 0.08,
-        },
-        ["rbxassetid://73748315742870"] = {
-            DisplayName = "M2",
-            ReactionTime = 0.3,
-        },
-        ["rbxassetid://82903450925391"] = {
-            DisplayName = "1stM1",
-            ParryTime = 0.08,
-        },
-        ["rbxassetid://119685134442395"] = {
-            DisplayName = "2ndM1",
-            ParryTime = 0.08,
-        },
-        ["rbxassetid://107464726433388"] = {
-            DisplayName = "3rdM1",
-            ParryTime = 0.08,
-        },
-        ["M1Time"] = 0.11,
-    },
-    ["MuayThaiAnims"] = {
-        ["rbxassetid://137034747040618"] = {
-            DisplayName = "M2",
-            ReactionTime = 0.3,
-        },
-        ["rbxassetid://74960202100098"] = {
-            DisplayName = "4thM1",
-            ParryTime = 0.08,
-        },
-        ["rbxassetid://104515319350296"] = {
-            DisplayName = "3rdM1",
-            ParryTime = 0.08,
-        },
-        ["rbxassetid://139911027872047"] = {
-            DisplayName = "2ndM1",
-            ParryTime = 0.08,
-        },
-        ["rbxassetid://96726284968458"] = {
-            DisplayName = "1stM1",
-            ParryTime = 0.08,
-        },
-        ["M1Time"] = 0.1,
-    },
-    ["BoxingAnims"] = {
-        ["rbxassetid://137980914350618"] = {
-            DisplayName = "1stM1",
-            ReactionTime = 0.12,
-        },
-        ["rbxassetid://100408082509740"] = {
-            DisplayName = "2ndM1",
-            ReactionTime = 0.12,
-        },
-        ["rbxassetid://94803478352691"] = {
-            DisplayName = "3rdM1",
-            ReactionTime = 0.15,
-        },
-        ["rbxassetid://78695517680318"] = {
-            DisplayName = "4thM1",
-            ReactionTime = 0.15,
-        },
-        ["rbxassetid://132022052139564"] = {
-            DisplayName = "M2",
-            ParryFunction = function(data)
-                if data.RegistryData.Processed == true then warn("no") return end
-                data.RegistryData.Processed = true
-                task.spawn(function()
-                    print("Boxing parry")
-                    task.wait(.3)
-                    Dodge()
-                    task.wait(.35)
-                    BlockStart(os.clock(), 0.6)
-                end)
-            end,
-        },
-    },
-    ["HakariAnims"] = {
-        ["rbxassetid://82855179231529"] = {
-            DisplayName = "MomentumM2"
-        },
-        ["rbxassetid://76236532060812"] = {
-            DisplayName = "1stM1",
-            ReactionTime = 0.15,
-        },
-        ["rbxassetid://74206130671324"] = {
-            DisplayName = "2ndM1",
-            ReactionTime = 0.17,
-        },
-        ["rbxassetid://71919935695307"] = {
-            DisplayName = "3rdM1",
-            ReactionTime = 0.15,
-        },
-        ["rbxassetid://122861547142657"] = {
-            DisplayName = "4thM1",
-            ReactionTime = 0.21,
-        },
-        ["rbxassetid://92851992709496"] = {
-            DisplayName = "M2",
-            ReactionTime = 0.35,
-        },
-    },
-    ["CapoeiraAnims"] = {
-        ["rbxassetid://125976167173936"] = {
-            DisplayName = "1stM1",
-            ReactionTime = 0.15,
-        },
-        ["rbxassetid://134945199381140"] = {
-            DisplayName = "2ndM1",
-            ReactionTime = 0.22,
-        },
-        ["rbxassetid://117877243065533"] = {
-            DisplayName = "3rdM1",
-            ReactionTime = 0.16,
-        },
-        ["rbxassetid://106965238908791"] = {
-            DisplayName = "4thM1",
-            ReactionTime = 0.16,
-        },
-        ["rbxassetid://131071815103338"] = {
-            DisplayName = "Whirlwind",
-            ReactionTime = 0.32,
-        }
-    },
-    ["SluggerAnims"] = {
-        ["rbxassetid://134829666925953"] = {
-            DisplayName = "1stM1",
-            ReactionTime = 0.24,
-        },
-        ["rbxassetid://104867156139010"] = {
-            DisplayName = "2ndM1",
-            ReactionTime = 0.22,
-        },
-        ["rbxassetid://112759168172605"] = {
-            DisplayName = "3rdM1",
-            ReactionTime = 0.22
-        },
-        ["rbxassetid://114647502301740"] = {
-            DisplayName = "4thM1",
-            ReactionTime = 0.19,
-        },
-        ["rbxassetid://118943955490014"] = {
-            DisplayName = "M2",
-            ReactionTime = 0.65,
-        }
-    },
-    ["StrikerAnims"] = {
-        ["rbxassetid://127909081017342"] = {
-            DisplayName = "1stM1"
-        },
-        ["rbxassetid://79563637573277"] = {
-            DisplayName = "2ndM1"
-        },
-        ["rbxassetid://118070233153900"] = {
-            DisplayName = "3rdM1"
-        },
-        ["rbxassetid://77710266587706"] = {
-            DisplayName = "4thM1"
-        },
-        ["rbxassetid://114364673509520"] = {
-            DisplayName = "M2"
-        },
-        ["rbxassetid://132840225082238"] = {
-            DisplayName = "1stM1"
-        },
-        ["rbxassetid://88761422474765"] = {
-            DisplayName = "2ndM1"
-        },
-        ["rbxassetid://98462236639320"] = {
-            DisplayName = "3rdM1"
-        },
-        ["rbxassetid://122451562066756"] = {
-            DisplayName = "4thM1"
-        }
-    },
-    ["KureAnims"] = {
-        ["rbxassetid://71676634048602"] = {
-            DisplayName = "4thM1"
-        },
-        ["rbxassetid://102407060635393"] = {
-            DisplayName = "M2",
-            ["ReactionTime"] = 0.01,
-        },
-        ["rbxassetid://82904229252991"] = {
-            DisplayName = "1stM1"
-        },
-        ["rbxassetid://103732110215321"] = {
-            DisplayName = "2ndM1"
-        },
-        ["rbxassetid://103964436023727"] = {
-            DisplayName = "3rdM1"
-        },
-    },
-    ["HakariOtherAnims"] = {
-        ["rbxassetid://126612786608030"] = {
-            DisplayName = "1stM1"
-        },
-        ["rbxassetid://113719263885794"] = {
-            DisplayName = "2ndM1"
-        },
-        ["rbxassetid://136305578634960"] = {
-            DisplayName = "3rdM1"
-        },
-        ["rbxassetid://89039586375625"] = {
-            DisplayName = "4thM1"
-        },
-        ["rbxassetid://82855179231529"] = {
-            DisplayName = "MomentumM2"
-        },
-        ["rbxassetid://101619248052969"] = {
-            DisplayName = "M2"
-        },
-    },
+
+        --// AUTO-GREEN SETTINGS
+        AUTO_GREEN_ENABLED = false,
+        SHOOT_KEY = 70,
+        RELEASE_TARGET = 0.274,
+        DETECT_THRESHOLD = 0.95,
+        SHOT_TIMEOUT = 3,
+        shotCount = 0,
+        shotState = "idle",
+        shotStartTime = 0,
+
+        --// AUTOPLAY STATE
+        tapHeld = {},
+        tapReleaseAt = {},
+        holdActive = {},
+        holdStartAt = {},
+        seenNotes = {},
+        lanesValid = false,
+        laneData = nil,
+        notesContainer = nil,
+        espScale = 1,
+        lastLaneRefresh = 0,
+        lastScaleUpdate = 0,
+        lastCleanupTime = 0,
+        CLEANUP_INTERVAL = 0.02,
+    }
 }
 
-local IgnoreIds = {
-73766443218740,111699625251889,85823794654077,83600639547203,99661732639863,106268941365574,109816855387997,122561749929324,129805948180599,
-90752347516770,135133599113049,132695091086148,137015026151472,114511731321756,122541287927198,80309578200579,100794890036133,109303037515668,117293898907979,74690341409113,73090768467054,72284079162560,92787945841620,89016181362524,
-76945839486275,101161965631044,80135556847061,128307941333158,85931837451298,91352556581859, 104407197874289,77911299793653,129335968179665, 122384188141033,
-132695766056641,113331696487725,124220338099067,99799500309776,108636808436488,90015977935891,87932588807124,132477488202815,102982320608759,109278619250401,79971841883936,97783129267001,72822821848529,79974955602012,77798715679680,85845666927963,108862846290180,108045962864902,93184693099565,120399899079666,99958962160522,
-}
+local AnimationTracker = AnimationTracker.new(Config.IgnoreIds),
+local LocalTracker = AnimationTracker.new(Config.IgnoreIds),
 
-local ParriedAnimation = {"rbxassetid://100773926241456", "rbxassetid://102823909334302", "rbxassetid://96304721384743", "rbxassetid://82979105739696", "rbxassetid://96600699015093", "rbxassetid://138519505081692"}
-local StunnedAnimation = {"rbxassetid://9598562590", "rbxassetid://9598537410", "rbxassetid://9598551746"}
-local ParryingAnimation = {"rbxassetid://118147060185189"}
-
---// AUTO PARRY CONFIG FLATTENING
+--// AUTO PARRY Config.AUTOPLAY_CONFIG FLATTENING
 local FlattenedConfig = {}
-for styleName, assets in pairs(GameConfig) do
+for styleName, assets in pairs(Config.Anims) do
     for assetId, data in pairs(assets) do
         if assetId == "M1Time" then continue end
         if assets["M1Time"] then end
@@ -308,63 +411,17 @@ for styleName, assets in pairs(GameConfig) do
         if data.DisplayName ~= "M2" and assets["M1Time"] then
             flatData.ReactionTime = assets["M1Time"]
         elseif not data.ReactionTime then
-            flatData.DefaultReactionTime = DEFAULT_REACTION_TIME
+            flatData.DefaultReactionTime = Config.DEFAULT_REACTION_TIME
         else
             flatData.ReactionTime = data.ReactionTime
         end
         FlattenedConfig[assetId] = flatData
     end
 end
-GameConfig = FlattenedConfig
+Config.Anims = FlattenedConfig
 
 --// AUTO PARRY FORWARD DECLARATIONS
-local Lib
-local LoggedText, IgnoredText, TargetPool_Text
-
---// AUTO PARRY STATE
-local AnimationsLoggedCache = {}
-local AnimationsLoggedOrder = {}
-local AnimationIdSliders = {}
-local scheduler = {}
-local pendingTasks = {}
-local ParryKey = string.byte("F")
-local DodgeKey = string.byte("A")
-local KeyHeld = false
-local ReleaseDeadline = 0
-local Stunned = false
-local AnimationTracker = AnimationTracker.new(IgnoreIds)
-local LocalTracker = AnimationTracker.new(IgnoreIds)
-local damageLoggerConnection = nil
-local previousHealth = 100
-local lastCharacter = nil
-local TargetCharacters = {}
-local EspTrackers = {}
-local CurrentIndex = 1
-local COLOR_WHITE = Color3.fromRGB(255, 255, 255)
-local COLOR_RED = Color3.fromRGB(255, 50, 50)
-local COLOR_GREEN = Color3.fromRGB(50, 255, 50)
-local AnimationRegistry = {}
-local LastPendingRegData = nil
-local InputRegisteredTime = nil
-local ParryRegisteredTime = nil
-local InputLatency = 0
-local DodgeLockoutEnd = 0
-local StunToken = 0
-local lastParryAt = 0
-local animationAddedConnection = nil
-local inputBeganConnection = nil
-local orbListenerConnection = nil
-
-local ParryState = {
-    IDLE = "idle",
-    INPUT_PENDING = "input_pending",
-    PARRYING = "parrying",
-    PARRYINGFAILED = "parryingfailed",
-    STUNNED = "stunned",
-    WINDOW_EXCEEDED = "window_exceeded",
-    SUCCESS = "parrysuccess",
-}
-local CurrentParryState = ParryState.IDLE
+local Lib, LoggedText, IgnoredText, TargetPool_Text, scheduler
 
 --// AUTO PARRY SCHEDULER
 function scheduler.delay(delayTime, callback)
@@ -388,7 +445,7 @@ end
 --// AUTO PARRY HELPERS
 local function GetAllFoldersInWorkspace()
     local Folders = {}
-    for _, Folder in game.Workspace:GetChildren() do
+    for _, Folder in Workspace:GetChildren() do
         if Folder.ClassName == "Folder" then
             table.insert(Folders, Folder.Name)
         end
@@ -397,13 +454,13 @@ local function GetAllFoldersInWorkspace()
 end
 
 local function GetAllCharactersInFolder()
-    if not SelectedFolder or not game.Workspace:FindFirstChild(SelectedFolder) then return end
+    if not Config.SelectedFolder or not Workspace:FindFirstChild(Config.SelectedFolder) then return end
     local Characters = {}
-    local folder = game.Workspace[SelectedFolder]
+    local folder = Workspace[Config.SelectedFolder]
     for _, Character in folder:GetChildren() do
         if Character.ClassName == "Model" and Character:FindFirstChildWhichIsA("Humanoid") then
-            if not INCLUDE_LOCAL_CHARACTER then
-                if Character.Address == game.Players.LocalPlayer.Character.Address then continue end
+            if not Config.INCLUDE_LOCAL_CHARACTER then
+                if Character.Address == LocalPlayer.Character.Address then continue end
             end
             table.insert(Characters, Character)
         end
@@ -413,11 +470,11 @@ end
 
 local function UpdateClipboardSection()
     local AnimationsLoggedCount = 0
-    for _, _ in AnimationsLoggedCache do
+    for _, _ in Config.AnimationsLoggedCache do
         AnimationsLoggedCount += 1
     end
     if LoggedText then LoggedText:SetText("Logged Ids: " .. AnimationsLoggedCount) end
-    if IgnoredText then IgnoredText:SetText("Ignored Ids: " .. #IgnoreIds) end
+    if IgnoredText then IgnoredText:SetText("Ignored Ids: " .. #Config.IgnoreIds) end
 end
 
 local function UpdateTargetPoolSection()
@@ -432,14 +489,14 @@ local function UpdateTargetPoolSection()
 end
 
 local function SetClipboardLoggedCache()
-    local totalItems = #AnimationsLoggedOrder
+    local totalItems = #Config.AnimationsLoggedOrder
     if totalItems == 0 then
         print("[Clipboard] Nothing logged to copy.")
         return
     end
     local ids = {}
     for i = 1, totalItems do
-        local numericId = tostring(AnimationsLoggedOrder[i]):match("%d+")
+        local numericId = tostring(Config.AnimationsLoggedOrder[i]):match("%d+")
         if numericId then
             table.insert(ids, numericId)
         end
@@ -451,38 +508,38 @@ local function SetClipboardLoggedCache()
 end
 
 local function SetClipboardIgnoreList()
-    local totalItems = #AnimationsLoggedOrder
+    local totalItems = #Config.AnimationsLoggedOrder
     if totalItems == 0 then
         print("[Clipboard] Nothing logged to copy.")
         return
     end
     local newlyAddedIds = {}
-    for AnimationId, _ in pairs(AnimationsLoggedCache) do
+    for AnimationId, _ in pairs(Config.AnimationsLoggedCache) do
         local numericId = tonumber(string.match(tostring(AnimationId), "%d+"))
         if numericId then
-            table.insert(IgnoreIds, numericId)
+            table.insert(Config.IgnoreIds, numericId)
             table.insert(newlyAddedIds, tostring(numericId))
         end
     end
     local outputstring = table.concat(newlyAddedIds, ", ")
     setclipboard(outputstring)
-    print(string.format("[Clipboard] Copied %d NEW IDs! (Total ignored: %d)", #newlyAddedIds, #IgnoreIds))
+    print(string.format("[Clipboard] Copied %d NEW IDs! (Total ignored: %d)", #newlyAddedIds, #Config.IgnoreIds))
 end
 
 local function LogAnimation(assetId, trackInfo)
-    if not AnimationsLoggedCache[assetId] then
-        AnimationsLoggedCache[assetId] = { Name = trackInfo.Name }
-        table.insert(AnimationsLoggedOrder, assetId)
+    if not Config.AnimationsLoggedCache[assetId] then
+        Config.AnimationsLoggedCache[assetId] = { Name = trackInfo.Name }
+        table.insert(Config.AnimationsLoggedOrder, assetId)
         UpdateClipboardSection()
     end
 end
 
 local function UpdateSliders()
-    for animationId, Info in pairs(GameConfig) do
-        if AnimationIdSliders[animationId] then
-            Info.DefaultReactionTime = DEFAULT_REACTION_TIME
+    for animationId, Info in pairs(Config.Anims) do
+        if Config.AnimationIdSliders[animationId] then
+            Info.DefaultReactionTime = Config.DEFAULT_REACTION_TIME
             local ReactionTime = Info.M1Time or Info.ReactionTime or Info.DefaultReactionTime
-            AnimationIdSliders[animationId]:Set(ReactionTime)
+            Config.AnimationIdSliders[animationId]:Set(ReactionTime)
         end
     end
 end
@@ -497,12 +554,12 @@ local function ListenForOrbs()
         if not hrp then return end
         local myPosition = hrp.Position
         local ActiveOrbs = {}
-        local thrownFolder = game.Workspace:FindFirstChild("Thrown")
+        local thrownFolder = Workspace:FindFirstChild("Thrown")
         if thrownFolder then
             for _, v in ipairs(thrownFolder:GetChildren()) do
                 if (v.Name == "ArdourBall2" or v.Name == "ArdourBall")
                     and v:IsA("BasePart")
-                    and v:IsDescendantOf(game.Workspace.Thrown)
+                    and v:IsDescendantOf(Workspace.Thrown)
                 then
                     table.insert(ActiveOrbs, v)
                 end
@@ -512,8 +569,8 @@ local function ListenForOrbs()
             local orb = ActiveOrbs[i]
             if orb and orb.Parent then
                 local distance = (myPosition - orb.Position).Magnitude
-                if distance <= PARRY_DISTANCE and (tick() - lastParryAt >= 0.08) then
-                    lastParryAt = tick()
+                if distance <= Config.PARRY_DISTANCE and (tick() - Config.lastParryAt >= 0.08) then
+                    Config.lastParryAt = tick()
                     print("Ok")
                     BlockStart()
                     BlockEnd()
@@ -540,32 +597,32 @@ end
 
 local function ToggleDamageLogger(state)
     if not state then
-        if damageLoggerConnection then
-            damageLoggerConnection:Disconnect()
-            damageLoggerConnection = nil
+        if Config.damageLoggerConnection then
+            Config.damageLoggerConnection:Disconnect()
+            Config.damageLoggerConnection = nil
         end
         print("[Logger] Heartbeat damage logger DISABLED.")
         return
     end
-    if damageLoggerConnection then return end
+    if Config.damageLoggerConnection then return end
     print("[Logger] Heartbeat damage logger ACTIVE.")
-    damageLoggerConnection = RunService.Heartbeat:Connect(function()
+    Config.damageLoggerConnection = RunService.Heartbeat:Connect(function()
         local char = LocalPlayer.Character
         local hum = char and char:FindFirstChild("Humanoid")
         if not hum then return end
-        if lastCharacter and (char.Address ~= lastCharacter.Address) then
-            lastCharacter = char
-            previousHealth = hum.Health
+        if Config.lastCharacter and (char.Address ~= Config.lastCharacter.Address) then
+            Config.lastCharacter = char
+            Config.previousHealth = hum.Health
         end
         local currentHealth = hum.Health
-        if currentHealth < previousHealth then
-            local damageTaken = previousHealth - currentHealth
-            if #TargetCharacters then
-                local activeAnimations = AnimationTracker:Update(TargetCharacters[1]) or {}
+        if currentHealth < Config.previousHealth then
+            local damageTaken = Config.previousHealth - currentHealth
+            if #Config.TargetCharacters then
+                local activeAnimations = AnimationTracker:Update(Config.TargetCharacters[1]) or {}
                 for _, anim in activeAnimations do
                     if not anim.AnimationId or anim.TimePosition < 0.1 or anim.TimePosition > 0.7 then continue end
                     local assetId = tostring(anim.AnimationId)
-                    local poolData = GameConfig[assetId]
+                    local poolData = Config.Anims[assetId]
                     warn(string.format("[HIT] %d DMG | Anim: %s (%s) %s | Frame Time: %.3f",
                         damageTaken,
                         poolData and poolData.DisplayName or anim.Name or "Unknown",
@@ -576,7 +633,7 @@ local function ToggleDamageLogger(state)
                 end
             end
         end
-        previousHealth = currentHealth
+        Config.previousHealth = currentHealth
     end)
 end
 
@@ -589,16 +646,16 @@ local function GetHeightMultiplierForCharacter(TargetCharacter)
 end
 
 local function ResetParryState()
-    KeyHeld = false
-    ReleaseDeadline = 0
+    Config.KeyHeld = false
+    Config.ReleaseDeadline = 0
     BlockEnd()
 end
 
 function Dodge()
     BlockEnd()
     for i = 1, 12, 1 do
-        keypress(DodgeKey)
-        keyrelease(DodgeKey)
+        keypress(Config.DodgeKey)
+        keyrelease(Config.DodgeKey)
     end
 end
 
@@ -607,54 +664,54 @@ function BlockStart(StartTime, HoldFor)
         warn("Lacking a start time")
         return
     end
-    if ParryRegisteredTime then
-        local TimeBetweenLastParry = os.clock() - ParryRegisteredTime
+    if Config.ParryRegisteredTime then
+        local TimeBetweenLastParry = os.clock() - Config.ParryRegisteredTime
         if TimeBetweenLastParry < 0.8 then
             print("parry is gonna be on cooldown")
             return
         end
     end
-    if CurrentParryState ~= ParryState.IDLE then
+    if Config.CurrentParryState ~= Config.ParryState.IDLE then
         warn("tried to press in a non idle state")
         return
     end
-    local holdFor = HoldFor or BLOCK_HOLD_TIME
-    ReleaseDeadline = StartTime + holdFor
-    KeyHeld = true
-    if AUTO_PARRY_ENABLED then
+    local holdFor = HoldFor or Config.BLOCK_HOLD_TIME
+    Config.ReleaseDeadline = StartTime + holdFor
+    Config.KeyHeld = true
+    if Config.AUTO_PARRY_ENABLED then
         if ismouse1pressed() then mouse2click() end
-        keypress(ParryKey)
+        keypress(Config.ParryKey)
     end
 end
 
 function BlockEnd()
-    KeyHeld = false
-    if AUTO_PARRY_ENABLED then
-        keyrelease(ParryKey)
+    Config.KeyHeld = false
+    if Config.AUTO_PARRY_ENABLED then
+        keyrelease(Config.ParryKey)
     end
 end
 
 --// AUTO PARRY STATE MACHINE
 local function TransitionToState(newState)
-    print(string.format("[Parry] %s -> %s", CurrentParryState, newState))
-    CurrentParryState = newState
+    print(string.format("[Parry] %s -> %s", Config.CurrentParryState, newState))
+    Config.CurrentParryState = newState
 end
 
 local function OnInputF()
-    if CurrentParryState == ParryState.IDLE then
-        InputRegisteredTime = os.clock()
-        TransitionToState(ParryState.INPUT_PENDING)
+    if Config.CurrentParryState == Config.ParryState.IDLE then
+        Config.InputRegisteredTime = os.clock()
+        TransitionToState(Config.ParryState.INPUT_PENDING)
     end
 end
 
 local function DebugParry()
-    local WeActuallyBlockedAt = ParryRegisteredTime
-    local WeWantedToBlockAt = InputRegisteredTime
-    local TimeTheServerReceived = InputLatency / 2
-    if LastPendingRegData then
-        local AnimationStartTime = LastPendingRegData.StartTime
-        local BlockStartTime = LastPendingRegData.BlockStart
-        local BlockExpire = LastPendingRegData.BlockExpire
+    local WeActuallyBlockedAt = Config.ParryRegisteredTime
+    local WeWantedToBlockAt = Config.InputRegisteredTime
+    local TimeTheServerReceived = Config.InputLatency / 2
+    if Config.LastPendingRegData then
+        local AnimationStartTime = Config.LastPendingRegData.StartTime
+        local BlockStartTime = Config.LastPendingRegData.BlockStart
+        local BlockExpire = Config.LastPendingRegData.BlockExpire
         local RelativeBlockStart = BlockStartTime - AnimationStartTime
         local RelativeBlockExpire = BlockExpire - AnimationStartTime
         local ClientReactionTime = WeWantedToBlockAt - AnimationStartTime
@@ -674,7 +731,7 @@ local function DebugParry()
             "[VERDICT]\n" ..
             "Status:               %s\n" ..
             "===================================================",
-            InputLatency, TimeTheServerReceived,
+            Config.InputLatency, TimeTheServerReceived,
             RelativeBlockStart, RelativeBlockExpire,
             ClientReactionTime, ServerRelativeTime,
             IsSuccess and "[SUCCESS]" or "[MISSED WINDOW]"
@@ -686,67 +743,67 @@ local function DebugParry()
             "Total Input Latency:  %.3fs\n" ..
             "One-Way Server Delay: %.3fs\n" ..
             "===================================================",
-            InputLatency, TimeTheServerReceived
+            Config.InputLatency, TimeTheServerReceived
         ))
     end
 end
 
 local function OnParryingAnimationSuccess()
-    if CurrentParryState == ParryState.INPUT_PENDING then
-        ParryRegisteredTime = os.clock()
-        InputLatency = os.clock() - InputRegisteredTime
-        if DEBUG_PARRY then
+    if Config.CurrentParryState == Config.ParryState.INPUT_PENDING then
+        Config.ParryRegisteredTime = os.clock()
+        Config.InputLatency = os.clock() - Config.InputRegisteredTime
+        if Config.DEBUG_PARRY then
             DebugParry()
         end
-        TransitionToState(ParryState.PARRYING)
+        TransitionToState(Config.ParryState.PARRYING)
     end
 end
 
 local function OnParryingAnimationFailed()
-    if CurrentParryState == ParryState.INPUT_PENDING then
-        TransitionToState(ParryState.PARRYINGFAILED)
+    if Config.CurrentParryState == Config.ParryState.INPUT_PENDING then
+        TransitionToState(Config.ParryState.PARRYINGFAILED)
         ResetParryState()
-        TransitionToState(ParryState.IDLE)
+        TransitionToState(Config.ParryState.IDLE)
     end
 end
 
 local function OnStunned()
-    if CurrentParryState ~= ParryState.STUNNED then
-        TransitionToState(ParryState.STUNNED)
+    if Config.CurrentParryState ~= Config.ParryState.STUNNED then
+        TransitionToState(Config.ParryState.STUNNED)
     end
-    StunToken += 1
-    local MyToken = StunToken
+    Config.StunToken += 1
+    local MyToken = Config.StunToken
     scheduler.delay(0.3, function()
-        if MyToken == StunToken then
+        if MyToken == Config.StunToken then
             BlockEnd()
-            TransitionToState(ParryState.IDLE)
+            TransitionToState(Config.ParryState.IDLE)
         end
     end)
 end
 
 local function OnSuccessfulParry()
-    if CurrentParryState == ParryState.PARRYING then
-        local AnimId = LastPendingRegData.AnimationId
-        local AttackConfig = GameConfig[AnimId]
-        local ParryPressTime = tonumber(InputRegisteredTime - LastPendingRegData.StartTime)
+    if Config.CurrentParryState == Config.ParryState.PARRYING then
+        local AnimId = Config.LastPendingRegData.AnimationId
+        local AttackConfig = Config.Anims[AnimId]
+        local ParryPressTime = tonumber(Config.InputRegisteredTime - Config.LastPendingRegData.StartTime)
         if ParryPressTime > 1 or ParryPressTime < 0 then return end
         if Lib then
             Lib:Notify("Parry Success",
                 string.format("%.3fs  - %s %s", ParryPressTime, AttackConfig.Style, AttackConfig.DisplayName),
                 2, "success")
         end
-        LastPendingRegData.LearnedParryTime = ParryPressTime
-        LastPendingRegData.Success = true
-        ParryRegisteredTime = 0
+        Config.LastPendingRegData.LearnedParryTime = ParryPressTime
+        Config.LastPendingRegData.Success = true
+        Config.ParryRegisteredTime = 0
         ResetParryState()
     end
 end
 
 local function OnWindowExceeded()
-    if CurrentParryState == ParryState.PARRYING then
-        if LastPendingRegData and LastPendingRegData.Success then
-            LastPendingRegData.Success = false
-            TransitionToState(ParryState.IDLE)
+    if Config.CurrentParryState == Config.ParryState.PARRYING then
+        if Config.LastPendingRegData and Config.LastPendingRegData.Success then
+            Config.LastPendingRegData.Success = false
+            TransitionToState(Config.ParryState.IDLE)
         end
     end
 end
@@ -765,12 +822,12 @@ end
 
 local function ParryTask()
     local now = os.clock()
-    if KeyHeld and os.clock() > ReleaseDeadline then
+    if Config.KeyHeld and os.clock() > Config.ReleaseDeadline then
         BlockEnd()
     end
-    if CurrentParryState == ParryState.INPUT_PENDING then
+    if Config.CurrentParryState == Config.ParryState.INPUT_PENDING then
         local MaxLatency = 0.5
-        local TimePassedSinceFWasPressed = now - InputRegisteredTime
+        local TimePassedSinceFWasPressed = now - Config.InputRegisteredTime
         local ActiveAnims = GetActiveAnimationsForCharacterAsDictionary(LocalPlayer.Character)
         if ActiveAnims and ActiveAnims[ParryingAnimation[1]] then
             OnParryingAnimationSuccess()
@@ -778,14 +835,14 @@ local function ParryTask()
         if TimePassedSinceFWasPressed > MaxLatency then
             warn(string.format("Parrying animation didn't appear, probably on CD MAX: %.2f | TIME: %.2f", MaxLatency, TimePassedSinceFWasPressed))
             OnParryingAnimationFailed()
-            TransitionToState(ParryState.IDLE)
+            TransitionToState(Config.ParryState.IDLE)
         end
-    elseif CurrentParryState == ParryState.PARRYING then
-        if not LastPendingRegData then
-            TransitionToState(ParryState.IDLE)
+    elseif Config.CurrentParryState == Config.ParryState.PARRYING then
+        if not Config.LastPendingRegData then
+            TransitionToState(Config.ParryState.IDLE)
             return
         end
-        local BlockExpire = LastPendingRegData.BlockExpire
+        local BlockExpire = Config.LastPendingRegData.BlockExpire
         local CurrentTime = os.clock()
         if CurrentTime > BlockExpire then
             OnWindowExceeded()
@@ -796,26 +853,25 @@ end
 --// AUTO PARRY LOCAL ANIMATION HANDLER
 local function onLocalAnimationAdded(anim)
     local animId = anim.AnimationId
-    if table.find(ParriedAnimation, animId) then
+    if table.find(Config.ParriedAnimation, animId) then
         OnSuccessfulParry()
     end
-    if table.find(ParryingAnimation, animId) then
-        if not InputRegisteredTime then return end
+    if table.find(Config.ParryingAnimation, animId) then
+        if not Config.InputRegisteredTime then return end
         OnParryingAnimationSuccess()
     end
-    if table.find(StunnedAnimation, animId) then
+    if table.find(Config.StunnedAnimation, animId) then
         OnStunned()
     end
 end
 
-animationAddedConnection = LocalTracker.AnimationAdded:Connect(onLocalAnimationAdded)
+Config.animationAddedConnection = LocalTracker.AnimationAdded:Connect(onLocalAnimationAdded)
 
 --// AUTO PARRY EVALUATION
 local function ValidateLocalCharacter()
-    local localCharacter = LocalPlayer and LocalPlayer.Character
-    local localRoot = localCharacter and localCharacter:FindFirstChild("HumanoidRootPart")
-    if not localRoot or Stunned then return nil end
-    return localCharacter, localRoot
+    local localRoot = LocalCharacter and LocalCharacter:FindFirstChild("HumanoidRootPart")
+    if not localRoot or Config.Stunned then return nil end
+    return LocalCharacter, localRoot
 end
 
 local function ValidateTargetCharacter(character)
@@ -829,39 +885,39 @@ local function CheckCharacterDistance(localRoot, targetRoot)
 end
 
 local function UpdateCharacterESP(character, Distance)
-    if not AUTO_PARRY_ENABLED then
-        if EspTrackers[character] and EspTrackers[character].ChangeText then
-            EspTrackers[character]:ChangeText("Name", "AUTO PARRY IS DISARMED", COLOR_RED)
+    if not Config.AUTO_PARRY_ENABLED then
+        if Config.EspTrackers[character] and Config.EspTrackers[character].ChangeText then
+            Config.EspTrackers[character]:ChangeText("Name", "AUTO PARRY IS DISARMED", Config.COLOR_RED)
         end
         return true
-    elseif Distance > AUTO_PARRY_RANGE then
-        if EspTrackers[character] and EspTrackers[character].ChangeText then
-            EspTrackers[character]:ChangeText("Name", character.Name.. " | OUT OF RANGE", COLOR_RED)
+    elseif Distance > Config.AUTO_PARRY_RANGE then
+        if Config.EspTrackers[character] and Config.EspTrackers[character].ChangeText then
+            Config.EspTrackers[character]:ChangeText("Name", character.Name.. " | OUT OF RANGE", Config.COLOR_RED)
         end
         return false
     else
-        if EspTrackers[character] and EspTrackers[character].ChangeText then
-            EspTrackers[character]:ChangeText("Name", character.Name.. " IN RANGE", COLOR_GREEN)
+        if Config.EspTrackers[character] and Config.EspTrackers[character].ChangeText then
+            Config.EspTrackers[character]:ChangeText("Name", character.Name.. " IN RANGE", Config.COLOR_GREEN)
         end
         return true
     end
 end
 
 local function CalculateParryTiming(attackConfig, StartTime)
-    local optimalReactionTime = (attackConfig.ReactionTime or DEFAULT_REACTION_TIME)
-    local adjustedReactionTime = optimalReactionTime + PARRY_OFFSET
+    local optimalReactionTime = (attackConfig.ReactionTime or Config.DEFAULT_REACTION_TIME)
+    local adjustedReactionTime = optimalReactionTime + Config.PARRY_OFFSET
     local parryWindowStart = adjustedReactionTime
-    local parryWindowEnd = adjustedReactionTime + PARRY_WINDOW
+    local parryWindowEnd = adjustedReactionTime + Config.PARRY_WINDOW
     local ClockStart = StartTime + parryWindowStart
     local ClockEnd = StartTime + parryWindowEnd
     return ClockStart, ClockEnd
 end
 
 local function UpdateAnimationRegistry(animKey, anim, now, currentTrackTime, attackConfig)
-    if not AnimationRegistry[animKey] then
+    if not Config.AnimationRegistry[animKey] then
         local adjustedNow = now - currentTrackTime
         local BlockStartTime, BlockExpire = CalculateParryTiming(attackConfig, adjustedNow)
-        AnimationRegistry[animKey] = {
+        Config.AnimationRegistry[animKey] = {
             StartTime = adjustedNow,
             Processed = false,
             CurrentClockTime = os.clock(),
@@ -875,7 +931,7 @@ local function UpdateAnimationRegistry(animKey, anim, now, currentTrackTime, att
             RandomNum = math.random(1, 100),
         }
     end
-    local regData = AnimationRegistry[animKey]
+    local regData = Config.AnimationRegistry[animKey]
     if regData.CurrentTrackTime and (currentTrackTime < regData.CurrentTrackTime) then
         local BlockStartTime, BlockExpire = CalculateParryTiming(attackConfig, now - currentTrackTime)
         regData.Processed = false
@@ -887,19 +943,19 @@ local function UpdateAnimationRegistry(animKey, anim, now, currentTrackTime, att
     end
     regData.CurrentClockTime = os.clock()
     regData.CurrentTrackTime = currentTrackTime
-    if LastPendingRegData == regData then
-        LastPendingRegData = regData
+    if Config.LastPendingRegData == regData then
+        Config.LastPendingRegData = regData
     end
     return regData
 end
 
-local function CheckAnimationDirection(character, localCharacter, localRoot, targetRoot, attackConfig)
-    if character.Address == localCharacter.Address then return true end
+local function CheckAnimationDirection(character, LocalCharacter, localRoot, targetRoot, attackConfig)
+    if character.Address == LocalCharacter.Address then return true end
     local direction = (targetRoot.Position - localRoot.Position).Unit
     local isHeavy = attackConfig.DisplayName == "M2" or attackConfig.DisplayName == "Heavy" or attackConfig.Heavy
     if not isHeavy then
-        if TARGET_FACING_YOU and targetRoot.CFrame.LookVector:Dot(-direction) < 0.25 then return false end
-        if YOU_FACING_TARGET and localRoot.CFrame.LookVector:Dot(direction) < 0.25 then return false end
+        if Config.TARGET_FACING_YOU and targetRoot.CFrame.LookVector:Dot(-direction) < 0.25 then return false end
+        if Config.YOU_FACING_TARGET and localRoot.CFrame.LookVector:Dot(direction) < 0.25 then return false end
     end
     return true
 end
@@ -912,15 +968,15 @@ local function ExecuteParry(regData, attackConfig)
             task.wait(.06)
             keyrelease(32)
         end)
-        DodgeLockoutEnd = os.clock() + 0.2
-    elseif isHeavy and AUTO_DODGE_ENABLED then
+        Config.DodgeLockoutEnd = os.clock() + 0.2
+    elseif isHeavy and Config.AUTO_DODGE_ENABLED then
         Dodge()
-        DodgeLockoutEnd = os.clock() + 0.2
+        Config.DodgeLockoutEnd = os.clock() + 0.2
     else
-        if LastPendingRegData ~= regData then
-            LastPendingRegData = regData
-            BlockStart(LastPendingRegData.BlockStart)
-        elseif LastPendingRegData == regData then
+        if Config.LastPendingRegData ~= regData then
+            Config.LastPendingRegData = regData
+            BlockStart(Config.LastPendingRegData.BlockStart)
+        elseif Config.LastPendingRegData == regData then
             if regData.DidALoop then
                 print(string.format("Block retriggered for [%s | %s] because its the same key but it looped",
                     attackConfig.Style, attackConfig.DisplayName))
@@ -931,16 +987,16 @@ local function ExecuteParry(regData, attackConfig)
     end
 end
 
-local function EvaluateAnimation(anim, character, localCharacter, localRoot, targetRoot, currentActiveIds)
+local function EvaluateAnimation(anim, character, LocalCharacter, localRoot, targetRoot, currentActiveIds)
     if not anim.AnimationId then return end
-    local attackConfig = GameConfig[tostring(anim.AnimationId)]
+    local attackConfig = Config.Anims[tostring(anim.AnimationId)]
     if not attackConfig then return end
     local animKey = anim.Address or anim
     currentActiveIds[animKey] = true
     local now = os.clock()
     local regData = UpdateAnimationRegistry(animKey, anim, now, anim.TimePosition or 0, attackConfig)
     if regData.Processed then return end
-    if attackConfig.ParryFunction and (now - regData.StartTime) <= (attackConfig.ReactionTime or DEFAULT_REACTION_TIME) + PARRY_WINDOW/2 then
+    if attackConfig.ParryFunction and (now - regData.StartTime) <= (attackConfig.ReactionTime or Config.DEFAULT_REACTION_TIME) + Config.PARRY_WINDOW/2 then
         attackConfig.ParryFunction({
             RegistryData = regData,
             Mob = character,
@@ -949,8 +1005,8 @@ local function EvaluateAnimation(anim, character, localCharacter, localRoot, tar
         })
         return
     end
-    if not CheckAnimationDirection(character, localCharacter, localRoot, targetRoot, attackConfig) then return end
-    if regData.RandomNum > PROBABILITY_TO_PARRY then
+    if not CheckAnimationDirection(character, LocalCharacter, localRoot, targetRoot, attackConfig) then return end
+    if regData.RandomNum > Config.PROBABILITY_TO_PARRY then
         regData.Processed = true
         return
     end
@@ -959,7 +1015,7 @@ local function EvaluateAnimation(anim, character, localCharacter, localRoot, tar
     end
 end
 
-local function EvaluateCharacter(character, localCharacter, localRoot, currentActiveIds)
+local function EvaluateCharacter(character, LocalCharacter, localRoot, currentActiveIds)
     local targetRoot = ValidateTargetCharacter(character)
     if not targetRoot then return end
     local Distance = CheckCharacterDistance(localRoot, targetRoot)
@@ -967,22 +1023,22 @@ local function EvaluateCharacter(character, localCharacter, localRoot, currentAc
     local activeAnimations = AnimationTracker:Update(character)
     if not activeAnimations or #activeAnimations == 0 then return end
     for _, anim in ipairs(activeAnimations) do
-        EvaluateAnimation(anim, character, localCharacter, localRoot, targetRoot, currentActiveIds)
+        EvaluateAnimation(anim, character, LocalCharacter, localRoot, targetRoot, currentActiveIds)
     end
 end
 
 local function EvaluateParryTriggers()
-    local localCharacter, localRoot = ValidateLocalCharacter()
-    if not localCharacter or not localRoot then return end
+    local localRoot = ValidateLocalCharacter()
+    if not LocalCharacter or not localRoot then return end
     local currentActiveIds = {}
-    for _, character in ipairs(TargetCharacters) do
-        EvaluateCharacter(character, localCharacter, localRoot, currentActiveIds)
+    for _, character in ipairs(Config.TargetCharacters) do
+        EvaluateCharacter(character, LocalCharacter, localRoot, currentActiveIds)
     end
-    for key, val in pairs(AnimationRegistry) do
+    for key, val in pairs(Config.AnimationRegistry) do
         if not currentActiveIds[key] then
-            AnimationRegistry[key] = nil
-            if LastPendingRegData == val then
-                LastPendingRegData = nil
+            Config.AnimationRegistry[key] = nil
+            if Config.LastPendingRegData == val then
+                Config.LastPendingRegData = nil
             end
         end
     end
@@ -990,18 +1046,18 @@ end
 
 --// AUTO PARRY ESP & LOGGING
 local function ProcessEspAndLogging()
-    for i = #TargetCharacters, 1, -1 do
-        local character = TargetCharacters[i]
-        local tracker = EspTrackers[character]
+    for i = #Config.TargetCharacters, 1, -1 do
+        local character = Config.TargetCharacters[i]
+        local tracker = Config.EspTrackers[character]
         if tracker and not tracker.ChangeText then
-            EspTrackers[character] = nil
-            table.remove(TargetCharacters, i)
+            Config.EspTrackers[character] = nil
+            table.remove(Config.TargetCharacters, i)
             continue
         end
         local activeAnimations = AnimationTracker:Update(character) or {}
         local lines = {}
         if #activeAnimations == 0 then
-            tracker:ChangeText("CurrentlyPlaying", "None", COLOR_WHITE)
+            tracker:ChangeText("CurrentlyPlaying", "None", Config.COLOR_WHITE)
             continue
         end
         for i = 1, #activeAnimations do
@@ -1010,7 +1066,7 @@ local function ProcessEspAndLogging()
             local assetId = anim.AnimationId
             local numericId = tonumber(string.match(tostring(assetId), "%d+"))
             if numericId and table.find(IgnoreIds, numericId) then continue end
-            local poolData = GameConfig[tostring(assetId)]
+            local poolData = Config.Anims[tostring(assetId)]
             local resolvedName = poolData and poolData.DisplayName or anim.Name
             if not poolData then
                 LogAnimation(assetId, { Name = resolvedName, AnimationId = assetId })
@@ -1021,19 +1077,19 @@ local function ProcessEspAndLogging()
                 poolData and poolData.Style or "???",
                 tostring(assetId),
                 anim.TimePosition or 0.00,
-                poolData and poolData.ReactionTime or DEFAULT_REACTION_TIME,
+                poolData and poolData.ReactionTime or Config.DEFAULT_REACTION_TIME,
                 poolData and "[Logged]" or "[Unknown]",
                 anim.Speed
             ))
         end
         if tracker and tracker.Name then
-            tracker:ChangeText("CurrentlyPlaying", table.concat(lines, "\n"), COLOR_WHITE)
+            tracker:ChangeText("CurrentlyPlaying", table.concat(lines, "\n"), Config.COLOR_WHITE)
         end
     end
 end
 
 local function ClearAllEspTrackers()
-    for char, tracker in pairs(EspTrackers) do
+    for char, tracker in pairs(Config.EspTrackers) do
         if tracker and tracker.Destroy then
             if ESP_Utility.TrackersToUpdate[tracker] then
                 ESP_Utility.TrackersToUpdate[tracker] = nil
@@ -1041,57 +1097,55 @@ local function ClearAllEspTrackers()
             tracker:Destroy()
         end
     end
-    table.clear(EspTrackers)
+    table.clear(Config.EspTrackers)
 end
 
 local function UpdateTargetCharacters(charactersList)
     ClearAllEspTrackers()
-    table.clear(TargetCharacters)
+    table.clear(Config.TargetCharacters)
     for _, character in charactersList do
-        table.insert(TargetCharacters, character)
+        table.insert(Config.TargetCharacters, character)
         if character and character:FindFirstChild("HumanoidRootPart") then
-            local tracker = ESP_Utility.NewTracker(character.HumanoidRootPart, character.Name, COLOR_RED)
+            local tracker = ESP_Utility.NewTracker(character.HumanoidRootPart, character.Name, Config.COLOR_RED)
             if tracker and tracker.Name then
                 tracker:AddText("CurrentlyPlaying", nil, "???")
             end
-            EspTrackers[character] = tracker
+            Config.EspTrackers[character] = tracker
         end
     end
 end
 
 function CycleEvent()
     local allCharacters = GetAllCharactersInFolder()
-    if not SelectedFolder or not allCharacters then
+    if not Config.SelectedFolder or not allCharacters then
         UpdateTargetCharacters({})
         return
     end
-    local localPlayer = game.Players.LocalPlayer
-    local localCharacter = localPlayer.Character
-    local localRoot = localCharacter and localCharacter:FindFirstChild("HumanoidRootPart")
+    local localRoot = LocalCharacter and LocalCharacter:FindFirstChild("HumanoidRootPart")
     if not localRoot then return end
     local validCharacters = {}
     for _, char in ipairs(allCharacters) do
-        if char == localCharacter then continue end
+        if char == LocalCharacter then continue end
         local targetRoot = char:FindFirstChild("HumanoidRootPart")
         if targetRoot then
             local distance = (localRoot.Position - targetRoot.Position).Magnitude
-            if distance <= MAX_CYCLE_RANGE then
+            if distance <= Config.MAX_CYCLE_RANGE then
                 table.insert(validCharacters, { Character = char, Distance = distance })
             end
         end
     end
     if #validCharacters == 0 then
-        CurrentIndex = 1
+        Config.CurrentIndex = 1
         UpdateTargetCharacters({})
-        if not AUTO_TARGET_NEAREST and Lib then
-            Lib:Notify("Cycle", "No targets found in range [".. MAX_CYCLE_RANGE.." studs]", 2, "warning")
+        if not Config.AUTO_TARGET_NEAREST and Lib then
+            Lib:Notify("Cycle", "No targets found in range [".. Config.MAX_CYCLE_RANGE.." studs]", 2, "warning")
         end
         return
     end
     table.sort(validCharacters, function(a, b)
         return a.Distance < b.Distance
     end)
-    if MULTI_TARGET then
+    if Config.MULTI_TARGET then
         local Max = 3
         local finalTargets = {}
         for i = 1, math.min(Max, #validCharacters) do
@@ -1099,8 +1153,8 @@ function CycleEvent()
         end
         UpdateTargetCharacters(finalTargets)
     else
-        CurrentIndex = (CurrentIndex % #validCharacters) + 1
-        local targetIndex = AUTO_TARGET_NEAREST and 1 or CurrentIndex
+        Config.CurrentIndex = (Config.CurrentIndex % #validCharacters) + 1
+        local targetIndex = Config.AUTO_TARGET_NEAREST and 1 or Config.CurrentIndex
         local selectedCharacter = validCharacters[targetIndex].Character
         UpdateTargetCharacters({selectedCharacter})
     end
@@ -1122,74 +1176,10 @@ if game.PlaceId == 8668476218 or game.PlaceId == 134572803901609 then
     orbListenerConnection = ListenForOrbs()
 end
 
---// AUTOPLAY SETTINGS
-local AUTOPLAY_ENABLED = false
-local SHOW_ESP = false
-local SHOW_HIT_LINE = true
-local SHOW_CIRCLES = true
-local SHOW_HOLD_TAILS = true
-local AUTO_DETECT_LANES = true
-local REQUIRE_GAME_FOCUS = true
-local DEBUG_LOGGING = false
-local ACTIVE_LANE_COUNT = 4
-local CURRENT_KEYS = {88, 67, 78, 77,}
-local LANE_ENABLED = {true, true, true, true}
-local LANE_REFRESH_INTERVAL = 0.5
-local SCALE_UPDATE_INTERVAL = 0.25
-local CONFIG = {
-    HOLD_MIN_H = 20,
-    TAP_HOLD_SEC = 0.05,
-    TOUCH_DIST = 30,
-    PAST_CATCH = 30,
-    APPROACH_DIST = 300,
-    MIN_DIST_X = 100,
-    LINE_THICK = 4,
-    CIRCLE_RADIUS = 20,
-    CIRCLE_SIDES = 48,
-    CIRCLE_THICK = 2,
-    TAIL_THICK = 5,
-    MAX_CIRCLES = 8,
-    LANE_COLORS = {
-        Color3.fromRGB(180, 255, 180),
-        Color3.fromRGB(255, 255, 255),
-        Color3.fromRGB(100, 220, 100),
-        Color3.fromRGB(60, 180, 60),
-    },
-    COLOR_ON_LINE = Color3.fromRGB(255, 255, 255),
-    COLOR_HOLD = Color3.fromRGB(150, 255, 150),
-    COLOR_APPROACH = Color3.fromRGB(100, 130, 100),
-    LINE_COLOR = Color3.fromRGB(255, 255, 255),
-}
-
---// AUTO-GREEN SETTINGS
-local AUTO_GREEN_ENABLED = false
-local SHOOT_KEY = 70
-local RELEASE_TARGET = 0.274
-local DETECT_THRESHOLD = 0.95
-local SHOT_TIMEOUT = 3
-local shotCount = 0
-local shotState = "idle"
-local shotStartTime = 0
-
---// AUTOPLAY STATE
-local tapHeld = {}
-local tapReleaseAt = {}
-local holdActive = {}
-local holdStartAt = {}
-local seenNotes = {}
-local lanesValid = false
-local laneData = nil
-local notesContainer = nil
-local espScale = 1
-local lastLaneRefresh = 0
-local lastScaleUpdate = 0
-local lastCleanupTime = 0
-local CLEANUP_INTERVAL = 0.02
-
 --// DRAWINGS
 local hitLine = Drawing.new("Line")
-hitLine.Color = CONFIG.LINE_COLOR
-hitLine.Thickness = CONFIG.LINE_THICK
+hitLine.Color = Config.AUTOPLAY_CONFIG.LINE_COLOR
+hitLine.Thickness = Config.AUTOPLAY_CONFIG.LINE_THICK
 hitLine.Visible = false
 hitLine.ZIndex = 5
 local circles = {}
@@ -1197,18 +1187,18 @@ local tails = {}
 for lane = 1, 4 do
     circles[lane] = {}
     tails[lane] = {}
-    seenNotes[lane] = {}
-    for i = 1, CONFIG.MAX_CIRCLES do
+    Config.seenNotes[lane] = {}
+    for i = 1, Config.AUTOPLAY_CONFIG.MAX_CIRCLES do
         local circle = Drawing.new("Circle")
-        circle.NumSides = CONFIG.CIRCLE_SIDES
-        circle.Radius = CONFIG.CIRCLE_RADIUS
-        circle.Thickness = CONFIG.CIRCLE_THICK
+        circle.NumSides = Config.AUTOPLAY_CONFIG.CIRCLE_SIDES
+        circle.Radius = Config.AUTOPLAY_CONFIG.CIRCLE_RADIUS
+        circle.Thickness = Config.AUTOPLAY_CONFIG.CIRCLE_THICK
         circle.Filled = false
         circle.Visible = false
         circle.ZIndex = 10
         circles[lane][i] = circle
         local tail = Drawing.new("Line")
-        tail.Thickness = CONFIG.TAIL_THICK
+        tail.Thickness = Config.AUTOPLAY_CONFIG.TAIL_THICK
         tail.Visible = false
         tail.ZIndex = 9
         tails[lane][i] = tail
@@ -1224,12 +1214,12 @@ local function safeCall(fn)
     return nil
 end
 local function debugLog(message, ...)
-    if DEBUG_LOGGING then
+    if Config.DEBUG_LOGGING then
         print(string.format(message, ...))
     end
 end
 local function isLaneEnabled(lane)
-    return LANE_ENABLED[lane] ~= false
+    return Config.LANE_ENABLED[lane] ~= false
 end
 
 --// DRAWING CLEANUP
@@ -1244,7 +1234,7 @@ end
 local function hideESP()
     hitLine.Visible = false
     for lane = 1, 4 do
-        for i = 1, CONFIG.MAX_CIRCLES do
+        for i = 1, Config.AUTOPLAY_CONFIG.MAX_CIRCLES do
             circles[lane][i].Visible = false
             tails[lane][i].Visible = false
         end
@@ -1253,7 +1243,7 @@ end
 local function clearDrawings()
     removeDrawing(hitLine)
     for lane = 1, 4 do
-        for i = 1, CONFIG.MAX_CIRCLES do
+        for i = 1, Config.AUTOPLAY_CONFIG.MAX_CIRCLES do
             removeDrawing(circles[lane][i])
             removeDrawing(tails[lane][i])
         end
@@ -1261,17 +1251,17 @@ local function clearDrawings()
 end
 local function releaseAllKeys()
     for lane = 1, 4 do
-        if CURRENT_KEYS[lane] then
-            keyrelease(CURRENT_KEYS[lane])
+        if Config.CURRENT_KEYS[lane] then
+            keyrelease(Config.CURRENT_KEYS[lane])
         end
-        tapHeld[lane] = false
-        holdActive[lane] = nil
-        holdStartAt[lane] = 0
-        seenNotes[lane] = {}
+        Config.tapHeld[lane] = false
+        Config.holdActive[lane] = nil
+        Config.holdStartAt[lane] = 0
+        Config.seenNotes[lane] = {}
     end
-    if shotState ~= "idle" then
-        keyrelease(SHOOT_KEY)
-        shotState = "idle"
+    if Config.shotState ~= "idle" then
+        keyrelease(Config.SHOOT_KEY)
+        Config.shotState = "idle"
     end
 end
 
@@ -1316,7 +1306,7 @@ local function refreshLanes()
     if not receptors or not lanesFrame then
         return false
     end
-    notesContainer = lanesFrame
+    Config.notesContainer = lanesFrame
     local receptorsFound = {}
     local count = 0
     for i = 1, 4 do
@@ -1344,22 +1334,14 @@ local function refreshLanes()
     if count == 0 then
         return false
     end
-    ACTIVE_LANE_COUNT = count
-    if AUTO_DETECT_LANES and ACTIVE_LANE_COUNT == 2 then
-        CURRENT_KEYS = {
-            70,
-            74
-        }
+    Config.ACTIVE_LANE_COUNT = count
+    if Config.AUTO_DETECT_LANES and Config.ACTIVE_LANE_COUNT == 2 then
+        Config.CURRENT_KEYS = {70, 74}
     else
-        CURRENT_KEYS = {
-            88,
-            67,
-            78,
-            77
-        }
-        ACTIVE_LANE_COUNT = 4
+        Config.CURRENT_KEYS = {88, 67, 78, 77}
+        Config.ACTIVE_LANE_COUNT = 4
     end
-    laneData = receptorsFound
+    vlaneData = receptorsFound
     local camera = Workspace.CurrentCamera
     local scale = 1
     if camera then
@@ -1370,20 +1352,20 @@ local function refreshLanes()
     local hitY = receptorsFound[1].hitY
     hitLine.From = Vector2.new(leftCx, hitY)
     hitLine.To = Vector2.new(rightCx, hitY)
-    if AUTOPLAY_ENABLED and SHOW_ESP then
+    if Config.AUTOPLAY_ENABLED and Config.SHOW_ESP then
         hitLine.Visible = true
     end
-    lanesValid = true
+    Config.lanesValid = true
     return true
 end
 local function cleanupStaleNotes()
     local now = os.clock()
-    if now - lastCleanupTime < CLEANUP_INTERVAL then
+    if now - Config.lastCleanupTime < Config.CLEANUP_INTERVAL then
         return
     end
-    lastCleanupTime = now
+    Config.lastCleanupTime = now
     for lane = 1, 4 do
-        local laneNotes = seenNotes[lane]
+        local laneNotes = Config.seenNotes[lane]
         for note in pairs(laneNotes) do
             if not safeCall(function()
                 return note.Parent
@@ -1449,7 +1431,7 @@ local function getNeedleProgress(meter)
     return math.clamp(progress, 0, 1)
 end
 local function updateAutoGreen(now)
-    if not AUTO_GREEN_ENABLED then
+    if not Config.AUTO_GREEN_ENABLED then
         return
     end
     local meter = getBasketballMeter()
@@ -1457,9 +1439,9 @@ local function updateAutoGreen(now)
         return meter:FindFirstChild("Needle")
     end)
     if not meter or not needle then
-        if shotState ~= "idle" then
-            debugLog("[Shot #%d] ended (meter gone)", shotCount)
-            shotState = "idle"
+        if Config.shotState ~= "idle" then
+            debugLog("[Shot #%d] ended (meter gone)", Config.shotCount)
+            Config.shotState = "idle"
         end
         return
     end
@@ -1467,48 +1449,48 @@ local function updateAutoGreen(now)
     if not progress then
         return
     end
-    if shotState == "idle" then
-        if progress > DETECT_THRESHOLD then
-            shotState = "tracking"
-            shotStartTime = now
-            shotCount += 1
-            debugLog("[Shot #%d] detected at %.2f%%", shotCount, progress * 100)
+    if Config.shotState == "idle" then
+        if progress > Config.DETECT_THRESHOLD then
+            Config.shotState = "tracking"
+            Config.shotStartTime = now
+            Config.shotCount += 1
+            debugLog("[Shot #%d] detected at %.2f%%", Config.shotCount, progress * 100)
         end
-    elseif shotState == "tracking" then
-        if progress <= RELEASE_TARGET then
-            shotState = "idle"
-            debugLog("[Shot #%d] RELEASE at %.2f%% (target %.2f%%)", shotCount, progress * 100, RELEASE_TARGET * 100)
-            keyrelease(SHOOT_KEY)
+    elseif Config.shotState == "tracking" then
+        if progress <= Config.RELEASE_TARGET then
+            Config.shotState = "idle"
+            debugLog("[Shot #%d] RELEASE at %.2f%% (target %.2f%%)", Config.shotCount, progress * 100, Config.RELEASE_TARGET * 100)
+            keyrelease(Config.SHOOT_KEY)
         elseif progress <= 0.01 then
-            debugLog("[Shot #%d] RELEASE at %.2f%% (reached top)", shotCount, progress * 100)
-            keyrelease(SHOOT_KEY)
-            shotState = "idle"
-        elseif now - shotStartTime > SHOT_TIMEOUT then
-            debugLog("[Shot #%d] RELEASE at %.2f%% (timeout)", shotCount, progress * 100)
-            keyrelease(SHOOT_KEY)
-            shotState = "idle"
+            debugLog("[Shot #%d] RELEASE at %.2f%% (reached top)", Config.shotCount, progress * 100)
+            keyrelease(Config.SHOOT_KEY)
+            Config.shotState = "idle"
+        elseif now - Config.shotStartTime > Config.SHOT_TIMEOUT then
+            debugLog("[Shot #%d] RELEASE at %.2f%% (timeout)", Config.shotCount, progress * 100)
+            keyrelease(Config.SHOOT_KEY)
+            Config.shotState = "idle"
         end
     end
 end
 
 --// AUTOPLAY
 local function updateAutoplay(now)
-    if not AUTOPLAY_ENABLED then
+    if not Config.AUTOPLAY_ENABLED then
         hideESP()
         return
     end
-    if now - lastScaleUpdate >= SCALE_UPDATE_INTERVAL then
-        lastScaleUpdate = now
+    if now - Config.lastScaleUpdate >= Config.SCALE_UPDATE_INTERVAL then
+        Config.lastScaleUpdate = now
         local camera = Workspace.CurrentCamera
         if camera then
-            espScale = camera.ViewportSize.Y / 1080
+            Config.espScale = camera.ViewportSize.Y / 1080
         end
     end
-    if now - lastLaneRefresh >= LANE_REFRESH_INTERVAL then
-        lastLaneRefresh = now
-        if lanesValid then
+    if now - Config.lastLaneRefresh >= Config.LANE_REFRESH_INTERVAL then
+        Config.lastLaneRefresh = now
+        if Config.lanesValid then
             if isRhythmUIGone() then
-                lanesValid = false
+                Config.lanesValid = false
                 hideESP()
                 releaseAllKeys()
             end
@@ -1516,17 +1498,17 @@ local function updateAutoplay(now)
             refreshLanes()
         end
     end
-    if not lanesValid or not laneData then
+    if not Config.lanesValid or not Config.laneData then
         return
     end
-    if SHOW_ESP and SHOW_HIT_LINE then
-        hitLine.Thickness = CONFIG.LINE_THICK * espScale
+    if Config.SHOW_ESP and Config.SHOW_HIT_LINE then
+        hitLine.Thickness = Config.AUTOPLAY_CONFIG.LINE_THICK * Config.espScale
         hitLine.Visible = true
     else
         hitLine.Visible = false
     end
     for lane = 1, 4 do
-        for i = 1, CONFIG.MAX_CIRCLES do
+        for i = 1, Config.AUTOPLAY_CONFIG.MAX_CIRCLES do
             circles[lane][i].Visible = false
             tails[lane][i].Visible = false
         end
@@ -1535,13 +1517,13 @@ local function updateAutoplay(now)
         if not isLaneEnabled(lane) then
             continue
         end
-        local key = CURRENT_KEYS[lane]
-        if tapHeld[lane] and now >= tapReleaseAt[lane] then
+        local key = Config.CURRENT_KEYS[lane]
+        if Config.tapHeld[lane] and now >= Config.tapReleaseAt[lane] then
             keyrelease(key)
-            tapHeld[lane] = false
+            Config.tapHeld[lane] = false
         end
-        if holdActive[lane] then
-            local hold = holdActive[lane]
+        if Config.holdActive[lane] then
+            local hold = Config.holdActive[lane]
             local invalid = false
             local parent = safeCall(function()
                 return hold.inst.Parent
@@ -1571,7 +1553,7 @@ local function updateAutoplay(now)
                         local tailH = tail and safeCall(function()
                             return tail.AbsoluteSize.Y
                         end) or 0
-                        local catchY = laneData[lane].hitY
+                        local catchY = Config.laneData[lane].hitY
                         if tailH < 2 or headY - tailH >= catchY then
                             invalid = true
                         end
@@ -1580,14 +1562,14 @@ local function updateAutoplay(now)
             end
             if invalid then
                 keyrelease(key)
-                holdActive[lane] = nil
-                holdStartAt[lane] = 0
+                Config.holdActive[lane] = nil
+                Config.holdStartAt[lane] = 0
             end
         end
     end
     cleanupStaleNotes()
     local children = safeCall(function()
-        return notesContainer:GetChildren()
+        return Config.notesContainer:GetChildren()
     end)
     if not children then
         return
@@ -1629,19 +1611,19 @@ local function updateAutoplay(now)
         local nearestLane = nil
         local nearestDist = math.huge
         for lane = 1, ACTIVE_LANE_COUNT do
-            if not laneData[lane] or not isLaneEnabled(lane) then
+            if not Config.laneData[lane] or not isLaneEnabled(lane) then
                 continue
             end
-            local dist = math.abs(headCX - laneData[lane].cx)
+            local dist = math.abs(headCX - Config.laneData[lane].cx)
             if dist < nearestDist then
                 nearestDist = dist
                 nearestLane = lane
             end
         end
-        if not nearestLane or nearestDist > CONFIG.MIN_DIST_X then
+        if not nearestLane or nearestDist > Config.AUTOPLAY_CONFIG.MIN_DIST_X then
             continue
         end
-        local laneNotes = seenNotes[nearestLane]
+        local laneNotes = Config.seenNotes[nearestLane]
         if laneNotes[note] then
             if not safeCall(function()
                 return note.Parent
@@ -1650,13 +1632,13 @@ local function updateAutoplay(now)
             end
             continue
         end
-        local catchY = laneData[nearestLane].hitY
+        local catchY = Config.laneData[nearestLane].hitY
         local distToLine = headCY - catchY
-        if distToLine > CONFIG.PAST_CATCH then
+        if distToLine > Config.AUTOPLAY_CONFIG.PAST_CATCH then
             laneNotes[note] = true
             continue
         end
-        if distToLine < - CONFIG.APPROACH_DIST then
+        if distToLine < - Config.AUTOPLAY_CONFIG.APPROACH_DIST then
             continue
         end
         local tail = safeCall(function()
@@ -1665,7 +1647,7 @@ local function updateAutoplay(now)
         local tailH = tail and safeCall(function()
             return tail.AbsoluteSize.Y
         end) or 0
-        local isHold = tailH > CONFIG.HOLD_MIN_H
+        local isHold = tailH > Config.AUTOPLAY_CONFIG.HOLD_MIN_H
         table.insert(notesByLane[nearestLane], {
             note = note,
             headCY = headCY,
@@ -1678,64 +1660,64 @@ local function updateAutoplay(now)
         if not isLaneEnabled(lane) then
             continue
         end
-        local key = CURRENT_KEYS[lane]
-        if not laneData[lane] then
+        local key = Config.CURRENT_KEYS[lane]
+        if not Config.laneData[lane] then
             continue
         end
-        local laneCX = laneData[lane].cx
+        local laneCX = Config.laneData[lane].cx
         local laneNotes = notesByLane[lane]
-        local seen = seenNotes[lane]
+        local seen = Config.seenNotes[lane]
         table.sort(laneNotes, function(a, b)
             return a.headCY < b.headCY
         end)
         for i, noteInfo in ipairs(laneNotes) do
-            if i > CONFIG.MAX_CIRCLES then
+            if i > Config.AUTOPLAY_CONFIG.MAX_CIRCLES then
                 break
             end
-            local onLine = noteInfo.dist >= - CONFIG.TOUCH_DIST and noteInfo.dist <= CONFIG.PAST_CATCH
-            if SHOW_ESP then
+            local onLine = noteInfo.dist >= - Config.AUTOPLAY_CONFIG.TOUCH_DIST and noteInfo.dist <= Config.AUTOPLAY_CONFIG.PAST_CATCH
+            if Config.SHOW_ESP then
                 local circle = circles[lane][i]
                 local tail = tails[lane][i]
                 local color
                 if onLine then
-                    color = CONFIG.COLOR_ON_LINE
-                elseif noteInfo.dist < - CONFIG.TOUCH_DIST then
-                    local t = 1 - math.abs(noteInfo.dist) / CONFIG.APPROACH_DIST
-                    local laneColor = CONFIG.LANE_COLORS[lane]
+                    color = Config.AUTOPLAY_CONFIG.COLOR_ON_LINE
+                elseif noteInfo.dist < - Config.AUTOPLAY_CONFIG.TOUCH_DIST then
+                    local t = 1 - math.abs(noteInfo.dist) / Config.AUTOPLAY_CONFIG.APPROACH_DIST
+                    local laneColor = Config.AUTOPLAY_CONFIG.LANE_COLORS[lane]
                     color = Color3.new(
-						CONFIG.COLOR_APPROACH.R + (laneColor.R - CONFIG.COLOR_APPROACH.R) * t, CONFIG.COLOR_APPROACH.G + (laneColor.G - CONFIG.COLOR_APPROACH.G) * t, CONFIG.COLOR_APPROACH.B + (laneColor.B - CONFIG.COLOR_APPROACH.B) * t)
+						Config.AUTOPLAY_CONFIG.COLOR_APPROACH.R + (laneColor.R - Config.AUTOPLAY_CONFIG.COLOR_APPROACH.R) * t, Config.AUTOPLAY_CONFIG.COLOR_APPROACH.G + (laneColor.G - Config.AUTOPLAY_CONFIG.COLOR_APPROACH.G) * t, Config.AUTOPLAY_CONFIG.COLOR_APPROACH.B + (laneColor.B - Config.AUTOPLAY_CONFIG.COLOR_APPROACH.B) * t)
                 else
-                    color = noteInfo.isHold and CONFIG.COLOR_HOLD or CONFIG.LANE_COLORS[lane]
+                    color = noteInfo.isHold and Config.AUTOPLAY_CONFIG.COLOR_HOLD or Config.AUTOPLAY_CONFIG.LANE_COLORS[lane]
                 end
-                if SHOW_CIRCLES then
+                if Config.SHOW_CIRCLES then
                     circle.Color = color
-                    circle.Radius = CONFIG.CIRCLE_RADIUS * espScale
-                    circle.Thickness = CONFIG.CIRCLE_THICK * espScale
+                    circle.Radius = Config.AUTOPLAY_CONFIG.CIRCLE_RADIUS * Config.espScale
+                    circle.Thickness = Config.AUTOPLAY_CONFIG.CIRCLE_THICK * Config.espScale
                     circle.Filled = noteInfo.isHold and not onLine
                     circle.Position = Vector2.new(laneCX, noteInfo.headCY)
                     circle.Visible = true
                 end
-                if SHOW_HOLD_TAILS and noteInfo.isHold and noteInfo.tailH > 0 then
+                if Config.SHOW_HOLD_TAILS and noteInfo.isHold and noteInfo.tailH > 0 then
                     tail.From = Vector2.new(laneCX, noteInfo.headCY)
                     tail.To = Vector2.new(laneCX, noteInfo.headCY - noteInfo.tailH)
-                    tail.Thickness = CONFIG.TAIL_THICK * espScale
+                    tail.Thickness = Config.AUTOPLAY_CONFIG.TAIL_THICK * Config.espScale
                     tail.Color = color
                     tail.Visible = true
                 end
             end
-            if onLine and not tapHeld[lane] and not holdActive[lane] then
+            if onLine and not Config.tapHeld[lane] and not Config.holdActive[lane] then
                 seen[noteInfo.note] = true
                 if noteInfo.isHold then
                     keypress(key)
-                    holdActive[lane] = {
+                    Config.holdActive[lane] = {
                         inst = noteInfo.note,
                         tailH = noteInfo.tailH,
                     }
-                    holdStartAt[lane] = now
+                    Config.holdStartAt[lane] = now
                 else
                     keypress(key)
-                    tapHeld[lane] = true
-                    tapReleaseAt[lane] = now + CONFIG.TAP_HOLD_SEC
+                    Config.tapHeld[lane] = true
+                    Config.tapReleaseAt[lane] = now + Config.AUTOPLAY_CONFIG.TAP_HOLD_SEC
                 end
                 break
             end
@@ -1747,24 +1729,24 @@ end
 local autoplayToggle
 local autoGreenToggle
 local function setAutoplayEnabled(value)
-    AUTOPLAY_ENABLED = value == true
-    if not AUTOPLAY_ENABLED then
+    Config.AUTOPLAY_ENABLED = value == true
+    if not Config.AUTOPLAY_ENABLED then
         releaseAllKeys()
         hideESP()
-        lanesValid = false
+        Config.lanesValid = false
     end
 end
 local function setShowESP(value)
-    SHOW_ESP = value == true
-    if not SHOW_ESP then
+    Config.SHOW_ESP = value == true
+    if not Config.SHOW_ESP then
         hideESP()
     end
 end
 local function setAutoGreenEnabled(value)
-    AUTO_GREEN_ENABLED = value == true
-    if not AUTO_GREEN_ENABLED and shotState ~= "idle" then
-        keyrelease(SHOOT_KEY)
-        shotState = "idle"
+    Config.AUTO_GREEN_ENABLED = value == true
+    if not Config.AUTO_GREEN_ENABLED and shotState ~= "idle" then
+        keyrelease(Config.SHOOT_KEY)
+        Config.shotState = "idle"
     end
 end
 
@@ -1773,29 +1755,29 @@ _G.Gakuran_Cleanup = function()
     releaseAllKeys()
     hideESP()
     clearDrawings()
-    lanesValid = false
-    laneData = nil
-    notesContainer = nil
-    shotState = "idle"
-    if animationAddedConnection then
-        animationAddedConnection:Disconnect()
-        animationAddedConnection = nil
+    Config.lanesValid = false
+    Config.laneData = nil
+    Config.notesContainer = nil
+    Config.shotState = "idle"
+    if Config.animationAddedConnection then
+        Config.animationAddedConnection:Disconnect()
+        Config.animationAddedConnection = nil
     end
-    if inputBeganConnection then
-        inputBeganConnection:Disconnect()
-        inputBeganConnection = nil
+    if Config.inputBeganConnection then
+        Config.inputBeganConnection:Disconnect()
+        Config.inputBeganConnection = nil
     end
-    if orbListenerConnection then
-        orbListenerConnection:Disconnect()
-        orbListenerConnection = nil
+    if Config.orbListenerConnection then
+        Config.orbListenerConnection:Disconnect()
+        Config.orbListenerConnection = nil
     end
-    if damageLoggerConnection then
-        damageLoggerConnection:Disconnect()
-        damageLoggerConnection = nil
+    if Config.damageLoggerConnection then
+        Config.damageLoggerConnection:Disconnect()
+        Config.damageLoggerConnection = nil
     end
     ClearAllEspTrackers()
-    table.clear(AnimationRegistry)
-    LastPendingRegData = nil
+    table.clear(Config.AnimationRegistry)
+    Config.LastPendingRegData = nil
 end
 if _G.Gakuran_Running then
     _G.Gakuran_Running = false
@@ -1855,63 +1837,63 @@ apFilesSection:Button("Save Configuration", function()
     Lib:Notify("Success", "Saved configuration", 2, "success")
 end)
 
-apConfigSection:Toggle("Debug Parry", DEBUG_PARRY, function(value)
-    DEBUG_PARRY = value
+apConfigSection:Toggle("Debug Parry", Config.DEBUG_PARRY, function(value)
+    Config.DEBUG_PARRY = value
 end)
-local offsetSlider = apConfigSection:Slider("Parry offset", PARRY_OFFSET, 0.01, -0.1, 0.1, "s", function(value)
-    PARRY_OFFSET = value
+local offsetSlider = apConfigSection:Slider("Parry offset", Config.PARRY_OFFSET, 0.01, -0.1, 0.1, "s", function(value)
+    Config.PARRY_OFFSET = value
 end)
-offsetSlider:Set(PARRY_OFFSET)
+offsetSlider:Set(Config.PARRY_OFFSET)
 apConfigSection:Info("Positive moves window forward making you parry later, Negative moves it backwards making you parry earlier")
-local rangeSlider = apConfigSection:Slider("Auto Parry Range", AUTO_PARRY_RANGE, 1, 7, 80, " studs", function(value)
-    AUTO_PARRY_RANGE = value
+local rangeSlider = apConfigSection:Slider("Auto Parry Range", Config.AUTO_PARRY_RANGE, 1, 7, 80, " studs", function(value)
+    Config.AUTO_PARRY_RANGE = value
 end)
-rangeSlider:Set(AUTO_PARRY_RANGE)
-local probabilitySlider = apConfigSection:Slider("Probability To Parry", PROBABILITY_TO_PARRY, 1, 1, 100, "%", function(value)
-    PROBABILITY_TO_PARRY = value
+rangeSlider:Set(Config.AUTO_PARRY_RANGE)
+local probabilitySlider = apConfigSection:Slider("Probability To Parry", Config.PROBABILITY_TO_PARRY, 1, 1, 100, "%", function(value)
+    Config.PROBABILITY_TO_PARRY = value
 end)
-probabilitySlider:Set(PROBABILITY_TO_PARRY)
+probabilitySlider:Set(Config.PROBABILITY_TO_PARRY)
 
 apSettingsSection:Info("Press X to target someone or enable Auto Target Nearest")
-local autoParryToggle = apSettingsSection:Toggle("Auto Parry", AUTO_PARRY_ENABLED, function(value)
-    AUTO_PARRY_ENABLED = value
-    Lib:Notify("Auto Parry", AUTO_PARRY_ENABLED and "Enabled" or "Disabled", 2, AUTO_PARRY_ENABLED and "success" or "warning")
+local autoParryToggle = apSettingsSection:Toggle("Auto Parry", Config.AUTO_PARRY_ENABLED, function(value)
+    Config.AUTO_PARRY_ENABLED = value
+    Lib:Notify("Auto Parry", Config.AUTO_PARRY_ENABLED and "Enabled" or "Disabled", 2, Config.AUTO_PARRY_ENABLED and "success" or "warning")
 end)
 autoParryToggle:AddKeybind("G", "Toggle")
-apSettingsSection:Toggle("Auto Dodge", AUTO_DODGE_ENABLED, function(value)
-    AUTO_DODGE_ENABLED = value
+apSettingsSection:Toggle("Auto Dodge", Config.AUTO_DODGE_ENABLED, function(value)
+    Config.AUTO_DODGE_ENABLED = value
 end)
-apSettingsSection:Toggle("Auto Target Nearest", AUTO_TARGET_NEAREST, function(value)
-    AUTO_TARGET_NEAREST = value
+apSettingsSection:Toggle("Auto Target Nearest", Config.AUTO_TARGET_NEAREST, function(value)
+    Config.AUTO_TARGET_NEAREST = value
 end)
-apSettingsSection:Toggle("Multiple Targets", MULTI_TARGET, function(value)
-    MULTI_TARGET = value
+apSettingsSection:Toggle("Multiple Targets", Config.MULTI_TARGET, function(value)
+    Config.MULTI_TARGET = value
 end)
 apSettingsSection:Divider("Conditions")
-apSettingsSection:Toggle("Target facing you", TARGET_FACING_YOU, function(value)
-    TARGET_FACING_YOU = value
+apSettingsSection:Toggle("Target facing you", Config.TARGET_FACING_YOU, function(value)
+    Config.TARGET_FACING_YOU = value
 end)
-apSettingsSection:Toggle("You facing target", YOU_FACING_TARGET, function(value)
-    YOU_FACING_TARGET = value
+apSettingsSection:Toggle("You facing target", Config.YOU_FACING_TARGET, function(value)
+    Config.YOU_FACING_TARGET = value
 end)
 
-local maxCycleSlider = apFoldersSection:Slider("Max Cycle Range", MAX_CYCLE_RANGE, 1, 7, 50, " studs", function(value)
-    MAX_CYCLE_RANGE = value
+local maxCycleSlider = apFoldersSection:Slider("Max Cycle Range", Config.MAX_CYCLE_RANGE, 1, 7, 50, " studs", function(value)
+    Config.MAX_CYCLE_RANGE = value
 end)
-maxCycleSlider:Set(MAX_CYCLE_RANGE)
-apFoldersSection:Toggle("Include Local Character", INCLUDE_LOCAL_CHARACTER, function(value)
-    INCLUDE_LOCAL_CHARACTER = value
+maxCycleSlider:Set(Config.MAX_CYCLE_RANGE)
+apFoldersSection:Toggle("Include Local Character", Config.INCLUDE_LOCAL_CHARACTER, function(value)
+    Config.INCLUDE_LOCAL_CHARACTER = value
     UpdateTargetPoolSection()
 end)
 TargetPool_Text = apFoldersSection:Label("NO TARGETS FOUND")
 local folderDropdown = apFoldersSection:Dropdown("Live Folder", nil, GetAllFoldersInWorkspace(), false, function(list)
     local Selected = list[1]
-    SelectedFolder = Selected
+    Config.SelectedFolder = Selected
     UpdateTargetPoolSection()
 end)
-if game.Workspace:FindFirstChild("Players") then
+if Workspace:FindFirstChild("Players") then
     folderDropdown:Set({"Players"})
-elseif game.Workspace:FindFirstChild("Live") then
+elseif Workspace:FindFirstChild("Live") then
     folderDropdown:Set({"Live"})
 end
 
@@ -1923,23 +1905,23 @@ apLoggingSection:Toggle("Damage Logs", false, function(value)
 end)
 apLoggingSection:Button("Add unknowns to ignore and copy ignore list", function()
     SetClipboardIgnoreList()
-    AnimationsLoggedCache = {}
-    AnimationsLoggedOrder = {}
+    Config.AnimationsLoggedCache = {}
+    Config.AnimationsLoggedOrder = {}
     UpdateClipboardSection()
 end)
 apLoggingSection:Button("Copy to clipboard", function()
     SetClipboardLoggedCache()
 end)
 apLoggingSection:Button("Clear animation cache", function()
-    AnimationsLoggedCache = {}
-    AnimationsLoggedOrder = {}
+    Config.AnimationsLoggedCache = {}
+    Config.AnimationsLoggedOrder = {}
     UpdateClipboardSection()
 end)
 
 --// AUTO PARRY STYLE CONFIGURATIONS
 local styleConfigTab = win:Tab("Style Configurations", "swords")
 local GroupedStyles = {}
-for animationId, Info in pairs(GameConfig) do
+for animationId, Info in pairs(Config.Anims) do
     local StyleName = Info.Style
     if not GroupedStyles[StyleName] then
         GroupedStyles[StyleName] = {}
@@ -1955,99 +1937,99 @@ for StyleName, Animations in pairs(GroupedStyles) do
             StyleSection:Info("Slider not possible for " .. nameLabel .. " since it uses a function")
             continue
         end
-        AnimationIdSliders[animationId] = StyleSection:Slider("Reaction Time: " .. nameLabel, 0, 0.01, 0, 1, "s", function(value)
-            if value ~= DEFAULT_REACTION_TIME then
+        Config.AnimationIdSliders[animationId] = StyleSection:Slider("Reaction Time: " .. nameLabel, 0, 0.01, 0, 1, "s", function(value)
+            if value ~= Config.DEFAULT_REACTION_TIME then
                 Info.ReactionTime = value
             end
         end)
-        AnimationIdSliders[animationId]:Set(Info.M1Time or Info.ReactionTime or DEFAULT_REACTION_TIME)
+        Config.AnimationIdSliders[animationId]:Set(Info.M1Time or Info.ReactionTime or Config.DEFAULT_REACTION_TIME)
     end
     styleNumber += 1
 end
 local defaultSection = styleConfigTab:Section("Default Configuration", "Full")
-local defaultTimeSlider = defaultSection:Slider("Default Reaction Time", DEFAULT_REACTION_TIME, 0.01, 0, 1, "s", function(value)
-    DEFAULT_REACTION_TIME = value
+local defaultTimeSlider = defaultSection:Slider("Default Reaction Time", Config.DEFAULT_REACTION_TIME, 0.01, 0, 1, "s", function(value)
+    Config.DEFAULT_REACTION_TIME = value
     UpdateSliders()
 end)
-defaultTimeSlider:Set(DEFAULT_REACTION_TIME)
+defaultTimeSlider:Set(Config.DEFAULT_REACTION_TIME)
 defaultSection:Info("Reaction time is the time you press F from the moment the animation starts playing. It does not account for ping")
 defaultSection:Divider("Window")
-local windowSlider = defaultSection:Slider("Default Parry Window", PARRY_WINDOW, 0.01, 0, 1, "s", function(value)
-    PARRY_WINDOW = value
+local windowSlider = defaultSection:Slider("Default Parry Window", Config.PARRY_WINDOW, 0.01, 0, 1, "s", function(value)
+    Config.PARRY_WINDOW = value
 end)
-windowSlider:Set(PARRY_WINDOW)
+windowSlider:Set(Config.PARRY_WINDOW)
 defaultSection:Info("This is usually constant, don't change this.")
 
 --// AUTOPLAY
 local autoplayTab = win:Tab("Autoplay", "sparkles")
 local autoplaySection = autoplayTab:Section("Gakuran Autoplay", "Full", "Automatic rhythm note inputs and visual overlay")
-autoplayToggle = autoplaySection:Toggle("Enabled", AUTOPLAY_ENABLED, function(value)
+autoplayToggle = autoplaySection:Toggle("Enabled", Config.AUTOPLAY_ENABLED, function(value)
     setAutoplayEnabled(value)
-    Lib:Notify("Gakuran Autoplay", AUTOPLAY_ENABLED and "Enabled" or "Disabled", 2, AUTOPLAY_ENABLED and "success" or "warning")
+    Lib:Notify("Gakuran Autoplay", Config.AUTOPLAY_ENABLED and "Enabled" or "Disabled", 2, Config.AUTOPLAY_ENABLED and "success" or "warning")
 end)
 autoplayToggle:AddKeybind("P", "Toggle")
 autoplaySection:Divider("Visuals")
-autoplaySection:Toggle("Show ESP", SHOW_ESP, function(value)
+autoplaySection:Toggle("Show ESP", Config.SHOW_ESP, function(value)
     setShowESP(value)
 end)
-autoplaySection:Toggle("Hit line", SHOW_HIT_LINE, function(value)
-    SHOW_HIT_LINE = value
-    if not SHOW_HIT_LINE then
+autoplaySection:Toggle("Hit line", Config.SHOW_HIT_LINE, function(value)
+    Config.SHOW_HIT_LINE = value
+    if not Config.SHOW_HIT_LINE then
         hitLine.Visible = false
     end
 end)
-autoplaySection:Toggle("Note circles", SHOW_CIRCLES, function(value)
-    SHOW_CIRCLES = value
+autoplaySection:Toggle("Note circles", Config.SHOW_CIRCLES, function(value)
+    Config.SHOW_CIRCLES = value
 end)
-autoplaySection:Toggle("Hold tails", SHOW_HOLD_TAILS, function(value)
-    SHOW_HOLD_TAILS = value
+autoplaySection:Toggle("Hold tails", Config.SHOW_HOLD_TAILS, function(value)
+    Config.SHOW_HOLD_TAILS = value
 end)
-autoplaySection:Slider("Circle radius", CONFIG.CIRCLE_RADIUS, 1, 5, 50, " px", function(value)
-    CONFIG.CIRCLE_RADIUS = value
+autoplaySection:Slider("Circle radius", Config.AUTOPLAY_CONFIG.CIRCLE_RADIUS, 1, 5, 50, " px", function(value)
+    Config.AUTOPLAY_CONFIG.CIRCLE_RADIUS = value
 end)
-autoplaySection:Slider("Line thickness", CONFIG.LINE_THICK, 1, 1, 10, " px", function(value)
-    CONFIG.LINE_THICK = value
+autoplaySection:Slider("Line thickness", Config.AUTOPLAY_CONFIG.LINE_THICK, 1, 1, 10, " px", function(value)
+    Config.AUTOPLAY_CONFIG.LINE_THICK = value
 end)
-autoplaySection:Slider("Max notes shown", CONFIG.MAX_CIRCLES, 1, 1, 16, "", function(value)
-    CONFIG.MAX_CIRCLES = math.floor(value)
+autoplaySection:Slider("Max notes shown", Config.AUTOPLAY_CONFIG.MAX_CIRCLES, 1, 1, 16, "", function(value)
+    Config.AUTOPLAY_CONFIG.MAX_CIRCLES = math.floor(value)
 end)
 autoplaySection:Divider("Timing")
-autoplaySection:Slider("Tap hold duration", CONFIG.TAP_HOLD_SEC * 1000, 1, 10, 200, " ms", function(value)
-    CONFIG.TAP_HOLD_SEC = value / 1000
+autoplaySection:Slider("Tap hold duration", Config.AUTOPLAY_CONFIG.TAP_HOLD_SEC * 1000, 1, 10, 200, " ms", function(value)
+    Config.AUTOPLAY_CONFIG.TAP_HOLD_SEC = value / 1000
 end)
-autoplaySection:Slider("Touch distance", CONFIG.TOUCH_DIST, 1, 5, 80, " px", function(value)
-    CONFIG.TOUCH_DIST = value
+autoplaySection:Slider("Touch distance", Config.AUTOPLAY_CONFIG.TOUCH_DIST, 1, 5, 80, " px", function(value)
+    Config.AUTOPLAY_CONFIG.TOUCH_DIST = value
 end)
-autoplaySection:Slider("Past catch window", CONFIG.PAST_CATCH, 1, 5, 80, " px", function(value)
-    CONFIG.PAST_CATCH = value
+autoplaySection:Slider("Past catch window", Config.AUTOPLAY_CONFIG.PAST_CATCH, 1, 5, 80, " px", function(value)
+    Config.AUTOPLAY_CONFIG.PAST_CATCH = value
 end)
-autoplaySection:Slider("Approach distance", CONFIG.APPROACH_DIST, 10, 50, 600, " px", function(value)
-    CONFIG.APPROACH_DIST = value
+autoplaySection:Slider("Approach distance", Config.AUTOPLAY_CONFIG.APPROACH_DIST, 10, 50, 600, " px", function(value)
+    Config.AUTOPLAY_CONFIG.APPROACH_DIST = value
 end)
-autoplaySection:Slider("Lane match tolerance", CONFIG.MIN_DIST_X, 5, 25, 250, " px", function(value)
-    CONFIG.MIN_DIST_X = value
+autoplaySection:Slider("Lane match tolerance", Config.AUTOPLAY_CONFIG.MIN_DIST_X, 5, 25, 250, " px", function(value)
+    Config.AUTOPLAY_CONFIG.MIN_DIST_X = value
 end)
-autoplaySection:Slider("Hold min height", CONFIG.HOLD_MIN_H, 1, 5, 80, " px", function(value)
-    CONFIG.HOLD_MIN_H = value
+autoplaySection:Slider("Hold min height", Config.AUTOPLAY_CONFIG.HOLD_MIN_H, 1, 5, 80, " px", function(value)
+    Config.AUTOPLAY_CONFIG.HOLD_MIN_H = value
 end)
-autoplaySection:Slider("Lane refresh rate", LANE_REFRESH_INTERVAL * 1000, 50, 100, 2000, " ms", function(value)
-    LANE_REFRESH_INTERVAL = value / 1000
+autoplaySection:Slider("Lane refresh rate", Config.LANE_REFRESH_INTERVAL * 1000, 50, 100, 2000, " ms", function(value)
+    Config.LANE_REFRESH_INTERVAL = value / 1000
 end)
 autoplaySection:Divider("Lanes")
-autoplaySection:Toggle("Auto-detect lane count", AUTO_DETECT_LANES, function(value)
-    AUTO_DETECT_LANES = value
-    lanesValid = false
+autoplaySection:Toggle("Auto-detect lane count", Config.AUTO_DETECT_LANES, function(value)
+    Config.AUTO_DETECT_LANES = value
+    Config.lanesValid = false
 end)
 for lane = 1, 4 do
-    autoplaySection:Toggle("Lane " .. lane, LANE_ENABLED[lane], function(value)
-        LANE_ENABLED[lane] = value
-        if not value and tapHeld[lane] then
-            keyrelease(CURRENT_KEYS[lane])
-            tapHeld[lane] = false
+    autoplaySection:Toggle("Lane " .. lane, Config.LANE_ENABLED[lane], function(value)
+        Config.LANE_ENABLED[lane] = value
+        if not value and Config.tapHeld[lane] then
+            keyrelease(Config.CURRENT_KEYS[lane])
+            Config.tapHeld[lane] = false
         end
-        if not value and holdActive[lane] then
-            keyrelease(CURRENT_KEYS[lane])
-            holdActive[lane] = nil
+        if not value and Config.holdActive[lane] then
+            keyrelease(Config.CURRENT_KEYS[lane])
+            Config.holdActive[lane] = nil
         end
     end)
 end
@@ -2055,66 +2037,66 @@ end
 --// AUTO-GREEN
 local autoGreenTab = win:Tab("Auto-Green", "target")
 local autoGreenSection = autoGreenTab:Section("Gakuran Auto-Green", "Full", "Automatic perfect basketball shot timing")
-autoGreenToggle = autoGreenSection:Toggle("Enabled", AUTO_GREEN_ENABLED, function(value)
+autoGreenToggle = autoGreenSection:Toggle("Enabled", Config.AUTO_GREEN_ENABLED, function(value)
     setAutoGreenEnabled(value)
-    Lib:Notify("Gakuran Auto-Green", AUTO_GREEN_ENABLED and "Enabled" or "Disabled", 2, AUTO_GREEN_ENABLED and "success" or "warning")
+    Lib:Notify("Gakuran Auto-Green", Config.AUTO_GREEN_ENABLED and "Enabled" or "Disabled", 2, Config.AUTO_GREEN_ENABLED and "success" or "warning")
 end)
 autoGreenToggle:AddKeybind("G", "Toggle")
-autoGreenSection:Slider("Release target %", RELEASE_TARGET * 100, 0.1, 10, 80, "%", function(value)
-    RELEASE_TARGET = value / 100
+autoGreenSection:Slider("Release target %", Config.RELEASE_TARGET * 100, 0.1, 10, 80, "%", function(value)
+    Config.RELEASE_TARGET = value / 100
     Lib:Notify("Auto-Green", "Release target: " .. value .. "%", 2, "info")
 end)
-autoGreenSection:Slider("Detect threshold %", DETECT_THRESHOLD * 100, 0.5, 80, 99, "%", function(value)
-    DETECT_THRESHOLD = value / 100
+autoGreenSection:Slider("Detect threshold %", Config.DETECT_THRESHOLD * 100, 0.5, 80, 99, "%", function(value)
+    Config.DETECT_THRESHOLD = value / 100
 end)
-autoGreenSection:Slider("Shot timeout", SHOT_TIMEOUT, 0.5, 1, 8, " s", function(value)
-    SHOT_TIMEOUT = value
+autoGreenSection:Slider("Shot timeout", Config.SHOT_TIMEOUT, 0.5, 1, 8, " s", function(value)
+    Config.SHOT_TIMEOUT = value
 end)
-autoGreenSection:Slider("Shoot key code", SHOOT_KEY, 1, 65, 90, "", function(value)
-    SHOOT_KEY = math.floor(value)
+autoGreenSection:Slider("Shoot key code", Config.SHOOT_KEY, 1, 65, 90, "", function(value)
+    Config.SHOOT_KEY = math.floor(value)
 end)
 autoGreenSection:Info("The release target % controls when the shot is released.\n\n" .. "Slide UP = releases earlier (higher %)\n" .. "Slide DOWN = releases later (lower %)\n\n" .. "Different in-game heights may need slight adjustments to hit 100% perfects consistently. " .. "Start around 27-28% and tweak from there.")
 
 --// GAME SETTINGS
 local gameSettingsTab = win:Tab("Game Settings", "cog")
 local rhythmColors = gameSettingsTab:Section("Gakuran Colors", "Full", "Autoplay visual colors")
-rhythmColors:Colorpicker("Hit line", CONFIG.LINE_COLOR, function(color)
-    CONFIG.LINE_COLOR = color
+rhythmColors:Colorpicker("Hit line", Config.AUTOPLAY_CONFIG.LINE_COLOR, function(color)
+    Config.AUTOPLAY_CONFIG.LINE_COLOR = color
     hitLine.Color = color
 end)
-rhythmColors:Colorpicker("Circle", CONFIG.LANE_COLORS[1], function(color)
-    CONFIG.LANE_COLORS[1] = color
-    CONFIG.LANE_COLORS[2] = color
-    CONFIG.LANE_COLORS[3] = color
-    CONFIG.LANE_COLORS[4] = color
+rhythmColors:Colorpicker("Circle", Config.AUTOPLAY_CONFIG.LANE_COLORS[1], function(color)
+    Config.AUTOPLAY_CONFIG.LANE_COLORS[1] = color
+    Config.AUTOPLAY_CONFIG.LANE_COLORS[2] = color
+    Config.AUTOPLAY_CONFIG.LANE_COLORS[3] = color
+    Config.AUTOPLAY_CONFIG.LANE_COLORS[4] = color
 end)
-rhythmColors:Colorpicker("Hold note", CONFIG.COLOR_HOLD, function(color)
-    CONFIG.COLOR_HOLD = color
+rhythmColors:Colorpicker("Hold note", Config.AUTOPLAY_CONFIG.COLOR_HOLD, function(color)
+    Config.AUTOPLAY_CONFIG.COLOR_HOLD = color
 end)
-rhythmColors:Colorpicker("On-line note", CONFIG.COLOR_ON_LINE, function(color)
-    CONFIG.COLOR_ON_LINE = color
+rhythmColors:Colorpicker("On-line note", Config.AUTOPLAY_CONFIG.COLOR_ON_LINE, function(color)
+    Config.AUTOPLAY_CONFIG.COLOR_ON_LINE = color
 end)
-rhythmColors:Colorpicker("Approach note", CONFIG.COLOR_APPROACH, function(color)
-    CONFIG.COLOR_APPROACH = color
+rhythmColors:Colorpicker("Approach note", Config.AUTOPLAY_CONFIG.COLOR_APPROACH, function(color)
+    Config.AUTOPLAY_CONFIG.COLOR_APPROACH = color
 end)
 rhythmColors:Divider("Per-lane colors")
 for lane = 1, 4 do
-    rhythmColors:Colorpicker("Lane " .. lane, CONFIG.LANE_COLORS[lane], function(color)
-        CONFIG.LANE_COLORS[lane] = color
+    rhythmColors:Colorpicker("Lane " .. lane, Config.AUTOPLAY_CONFIG.LANE_COLORS[lane], function(color)
+        Config.AUTOPLAY_CONFIG.LANE_COLORS[lane] = color
     end)
 end
 local rhythmAdvanced = gameSettingsTab:Section("Gakuran Advanced", "Full", "Miscellaneous script behavior")
-rhythmAdvanced:Toggle("Require game focus", REQUIRE_GAME_FOCUS, function(value)
-    REQUIRE_GAME_FOCUS = value
+rhythmAdvanced:Toggle("Require game focus", Config.REQUIRE_GAME_FOCUS, function(value)
+    Config.REQUIRE_GAME_FOCUS = value
 end)
-rhythmAdvanced:Toggle("Debug logging", DEBUG_LOGGING, function(value)
-    DEBUG_LOGGING = value
+rhythmAdvanced:Toggle("Debug logging", Config.DEBUG_LOGGING, function(value)
+    Config.DEBUG_LOGGING = value
 end)
-rhythmAdvanced:Slider("Circle thickness", CONFIG.CIRCLE_THICK, 1, 1, 8, " px", function(value)
-    CONFIG.CIRCLE_THICK = value
+rhythmAdvanced:Slider("Circle thickness", Config.AUTOPLAY_CONFIG.CIRCLE_THICK, 1, 1, 8, " px", function(value)
+    Config.AUTOPLAY_CONFIG.CIRCLE_THICK = value
 end)
-rhythmAdvanced:Slider("Tail thickness", CONFIG.TAIL_THICK, 1, 1, 12, " px", function(value)
-    CONFIG.TAIL_THICK = value
+rhythmAdvanced:Slider("Tail thickness", Config.AUTOPLAY_CONFIG.TAIL_THICK, 1, 1, 12, " px", function(value)
+    Config.AUTOPLAY_CONFIG.TAIL_THICK = value
 end)
 Lib:Category("Universal")
 
@@ -2134,7 +2116,7 @@ movement:Info("Universal movement features will be added here.")
 local misc = win:Tab("Misc", "three-dots-horizontal")
 local utilities = misc:Section("Utilities", "Full")
 utilities:Button("Refresh lanes", function()
-    lanesValid = false
+    Config.lanesValid = false
     refreshLanes()
     Lib:Notify("Novaa", "Lanes refreshed", 1, "success")
 end)
@@ -2143,8 +2125,8 @@ utilities:Button("Release all keys", function()
     Lib:Notify("Novaa", "All keys released", 1, "success")
 end)
 utilities:Button("Reset shot counter", function()
-    shotCount = 0
-    shotState = "idle"
+    Config.shotCount = 0
+    Config.shotState = "idle"
     Lib:Notify("Novaa", "Shot counter reset", 1, "success")
 end)
 utilities:Button("Unload", function()
@@ -2181,7 +2163,7 @@ renderConnection = RunService.RenderStepped:Connect(function()
         end
         return
     end
-    if REQUIRE_GAME_FOCUS and not isrbxactive() then
+    if Config.REQUIRE_GAME_FOCUS and not isrbxactive() then
         return
     end
     local now = os.clock()
@@ -2194,7 +2176,7 @@ renderConnection = RunService.RenderStepped:Connect(function()
     end
     if (now - LastCycleCheck >= UTILITY_TICK) then
         LastCycleCheck = now
-        if AUTO_TARGET_NEAREST then
+        if Config.AUTO_TARGET_NEAREST then
             CycleEvent()
         end
         ProcessEspAndLogging()
@@ -2203,6 +2185,6 @@ renderConnection = RunService.RenderStepped:Connect(function()
     updateAutoGreen(now)
 end)
 
---// LOAD CONFIG LAST
+--// LOAD Config.AUTOPLAY_CONFIG LAST
 win:autoloadConfig("Gakuran")
 Lib:Notify("Loaded", "Novaa script is ready!", 3, "success")
