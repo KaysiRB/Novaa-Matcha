@@ -49,7 +49,7 @@ local GAMES = {
     },
     [9199655655] = {
         Name = "Gakuran",
-        Module = "Games/Gakuran.luau",
+        Module = "Games/Gakuran/Gakuran.luau",
     },
 }
 
