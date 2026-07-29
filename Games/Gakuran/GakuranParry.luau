@@ -12,9 +12,6 @@ return function(ctx)
 	local AnimationTrackerModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/artxficial/matchastuff/main/animationtracker.lua"))()
 
 	local parryConfigSource
-	if readfile then
-		parryConfigSource = readfile("Games/Gakuran/GakuranParryConfig.luau")
-	end
 	if not parryConfigSource then
 		parryConfigSource = game:HttpGet("https://raw.githubusercontent.com/KaysiRB/Novaa-Matcha/main/Games/Gakuran/GakuranParryConfig.luau")
 	end

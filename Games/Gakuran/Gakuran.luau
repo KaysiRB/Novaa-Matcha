@@ -857,9 +857,6 @@ end)
 --// AUTO PARRY MODULE
 local function loadAutoParryModule()
     local source
-    if readfile then
-        source = readfile("Games/Gakuran/GakuranParry.luau")
-    end
     if not source then
         source = game:HttpGet("https://raw.githubusercontent.com/KaysiRB/Novaa-Matcha/main/Games/Gakuran/GakuranParry.luau")
     end
