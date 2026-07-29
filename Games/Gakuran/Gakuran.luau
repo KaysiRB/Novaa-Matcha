@@ -637,7 +637,6 @@ end
 --// STATE
 local autoplayToggle
 local autoGreenToggle
-local autoParry = nil
 local function setAutoplayEnabled(value)
     AUTOPLAY_ENABLED = value == true
     if not AUTOPLAY_ENABLED then
@@ -661,7 +660,7 @@ local function setAutoGreenEnabled(value)
 end
 
 --// CLEANUP
-local function coreCleanup()
+_G.Gakuran_Cleanup = function()
     releaseAllKeys()
     hideESP()
     clearDrawings()
@@ -669,12 +668,7 @@ local function coreCleanup()
     laneData = nil
     notesContainer = nil
     shotState = "idle"
-    if autoParry then
-        autoParry.Cleanup()
-    end
 end
-
-_G.Gakuran_Cleanup = coreCleanup
 if _G.Gakuran_Running then
     _G.Gakuran_Running = false
     if _G.Gakuran_Cleanup then
@@ -853,32 +847,9 @@ end)
 rhythmAdvanced:Slider("Tail thickness", CONFIG.TAIL_THICK, 1, 1, 12, " px", function(value)
     CONFIG.TAIL_THICK = value
 end)
-
---// AUTO PARRY MODULE
-local function loadAutoParryModule()
-    local source
-    if not source then
-        source = game:HttpGet("https://raw.githubusercontent.com/KaysiRB/Novaa-Matcha/main/Games/Gakuran/GakuranParry.luau")
-    end
-    return loadstring(source, "GakuranParry")()
-end
-
-local autoParryInit = loadAutoParryModule()
-if autoParryInit then
-    autoParry = autoParryInit({
-        RunService = RunService,
-        Workspace = Workspace,
-        LocalPlayer = LocalPlayer,
-        Lib = Lib,
-        win = win,
-        safeCall = safeCall,
-    })
-    Lib:Notify("Auto Parry", "Auto parry module loaded", 2, "success")
-else
-    Lib:Notify("Auto Parry", "Failed to load auto parry module", 3, "warning")
-end
-
 Lib:Category("Universal")
+
+--// VISUALS
 local visuals = win:Tab("Visuals", "eye")
 local universalVisuals = visuals:Section("Universal Visuals", "Full", "Features shared between supported games")
 universalVisuals:Info("Universal visual features will be added here.")
@@ -906,12 +877,6 @@ utilities:Button("Reset shot counter", function()
     shotCount = 0
     shotState = "idle"
     Lib:Notify("Novaa", "Shot counter reset", 1, "success")
-end)
-utilities:Button("Cycle parry targets", function()
-    if autoParry then
-        autoParry.CycleTargets()
-        Lib:Notify("Novaa", "Parry targets cycled", 1, "success")
-    end
 end)
 utilities:Button("Unload", function()
     Lib:Dialog({
@@ -951,9 +916,6 @@ renderConnection = RunService.RenderStepped:Connect(function()
     local now = os.clock()
     updateAutoplay(now)
     updateAutoGreen(now)
-    if autoParry then
-        autoParry.Update()
-    end
 end)
 
 --// LOAD CONFIG LAST

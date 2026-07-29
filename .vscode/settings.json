@@ -7,6 +7,6 @@
         "editor.defaultFormatter": "JohnnyMorganz.stylua"
     },
     "[lua]": {
-        "editor.defaultFormatter": "JohnnyMorganz.stylua"
+        "editor.defaultFormatter": "Koihik.vscode-lua-format"
     },
 }
