@@ -9,9 +9,7 @@ local UIS = game:GetService("UserInputService")
 local ImportESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/artxficial/matchastuff/main/esp_utility.lua"))()
 local ImportAnimationTracker = loadstring(game:HttpGet("https://raw.githubusercontent.com/artxficial/matchastuff/main/animationtracker.lua"))()
 
---// AUTO PARRY GAME Config.AUTOPLAY_CONFIG
 local Config = {
-    --// AUTO PARRY SETTINGS
     AUTO_PARRY_ENABLED = true,
     AUTO_DODGE_ENABLED = true,
     AUTO_TARGET_NEAREST = false,
@@ -30,402 +28,406 @@ local Config = {
     PARRY_DISTANCE = 15,
     SelectedFolder = nil,
     Anims = {
-        ["KarateAnims"] = {
-            ["rbxassetid://137837926745158"] = {
-                DisplayName = "1stM1",
-                ReactionTime = 0.15,
+        FightingStyle = {
+            ["KarateAnims"] = {
+                ["rbxassetid://137837926745158"] = {
+                    DisplayName = "1stM1",
+                    ReactionTime = 0.15,
+                },
+                ["rbxassetid://100981571094705"] = {
+                    DisplayName = "2ndM1",
+                    ReactionTime = 0.15,
+                },
+                ["rbxassetid://130865087635587"] = {
+                    DisplayName = "3rdM1",
+                    ReactionTime = 0.22,
+                },
+                ["rbxassetid://86495068205420"] = {
+                    DisplayName = "4thM1",
+                    ReactionTime = 0.22,
+                },
+                ["rbxassetid://120393553812903"] = {
+                    DisplayName = "M2",
+                    ReactionTime = 0.3,
+                },
             },
-            ["rbxassetid://100981571094705"] = {
-                DisplayName = "2ndM1",
-                ReactionTime = 0.15,
+            ["BasicAnims"] = {
+                ["rbxassetid://83491849294956"] = {
+                    DisplayName = "1stM1"
+                },
+                ["rbxassetid://89420531853362"] = {
+                    DisplayName = "2ndM1"
+                },
+                ["rbxassetid://83730275893449"] = {
+                    DisplayName = "3rdM1"
+                },
+                ["rbxassetid://106980660082799"] = {
+                    DisplayName = "4thM1"
+                },
+                ["rbxassetid://78888626472394"] = {
+                    DisplayName = "M2",
+                    ReactionTime = 0.3,
+                },
+                ["M1Time"] = 0.14,
             },
-            ["rbxassetid://130865087635587"] = {
-                DisplayName = "3rdM1",
-                ReactionTime = 0.22,
+            ["WrestlingAnims"] = {
+                ["rbxassetid://91485623489753"] = {
+                    DisplayName = "4thM1",
+                    ParryTime = 0.08,
+                },
+                ["rbxassetid://73748315742870"] = {
+                    DisplayName = "M2",
+                    ReactionTime = 0.3,
+                },
+                ["rbxassetid://82903450925391"] = {
+                    DisplayName = "1stM1",
+                    ParryTime = 0.08,
+                },
+                ["rbxassetid://119685134442395"] = {
+                    DisplayName = "2ndM1",
+                    ParryTime = 0.08,
+                },
+                ["rbxassetid://107464726433388"] = {
+                    DisplayName = "3rdM1",
+                    ParryTime = 0.08,
+                },
+                ["M1Time"] = 0.11,
             },
-            ["rbxassetid://86495068205420"] = {
-                DisplayName = "4thM1",
-                ReactionTime = 0.22,
+            ["MuayThaiAnims"] = {
+                ["rbxassetid://137034747040618"] = {
+                    DisplayName = "M2",
+                    ReactionTime = 0.3,
+                },
+                ["rbxassetid://74960202100098"] = {
+                    DisplayName = "4thM1",
+                    ParryTime = 0.08,
+                },
+                ["rbxassetid://104515319350296"] = {
+                    DisplayName = "3rdM1",
+                    ParryTime = 0.08,
+                },
+                ["rbxassetid://139911027872047"] = {
+                    DisplayName = "2ndM1",
+                    ParryTime = 0.08,
+                },
+                ["rbxassetid://96726284968458"] = {
+                    DisplayName = "1stM1",
+                    ParryTime = 0.08,
+                },
+                ["M1Time"] = 0.1,
             },
-            ["rbxassetid://120393553812903"] = {
-                DisplayName = "M2",
-                ReactionTime = 0.3,
+            ["BoxingAnims"] = {
+                ["rbxassetid://137980914350618"] = {
+                    DisplayName = "1stM1",
+                    ReactionTime = 0.12,
+                },
+                ["rbxassetid://100408082509740"] = {
+                    DisplayName = "2ndM1",
+                    ReactionTime = 0.12,
+                },
+                ["rbxassetid://94803478352691"] = {
+                    DisplayName = "3rdM1",
+                    ReactionTime = 0.15,
+                },
+                ["rbxassetid://78695517680318"] = {
+                    DisplayName = "4thM1",
+                    ReactionTime = 0.15,
+                },
+                ["rbxassetid://132022052139564"] = {
+                    DisplayName = "M2",
+                    ParryFunction = function(data)
+                        if data.RegistryData.Processed == true then warn("no") return end
+                        data.RegistryData.Processed = true
+                        task.spawn(function()
+                            print("Boxing parry")
+                            task.wait(.3)
+                            Dodge()
+                            task.wait(.35)
+                            BlockStart(os.clock(), 0.6)
+                        end)
+                    end,
+                },
+            },
+            ["HakariAnims"] = {
+                ["rbxassetid://82855179231529"] = {
+                    DisplayName = "MomentumM2"
+                },
+                ["rbxassetid://76236532060812"] = {
+                    DisplayName = "1stM1",
+                    ReactionTime = 0.15,
+                },
+                ["rbxassetid://74206130671324"] = {
+                    DisplayName = "2ndM1",
+                    ReactionTime = 0.17,
+                },
+                ["rbxassetid://71919935695307"] = {
+                    DisplayName = "3rdM1",
+                    ReactionTime = 0.15,
+                },
+                ["rbxassetid://122861547142657"] = {
+                    DisplayName = "4thM1",
+                    ReactionTime = 0.21,
+                },
+                ["rbxassetid://92851992709496"] = {
+                    DisplayName = "M2",
+                    ReactionTime = 0.35,
+                },
+            },
+            ["CapoeiraAnims"] = {
+                ["rbxassetid://125976167173936"] = {
+                    DisplayName = "1stM1",
+                    ReactionTime = 0.15,
+                },
+                ["rbxassetid://134945199381140"] = {
+                    DisplayName = "2ndM1",
+                    ReactionTime = 0.22,
+                },
+                ["rbxassetid://117877243065533"] = {
+                    DisplayName = "3rdM1",
+                    ReactionTime = 0.16,
+                },
+                ["rbxassetid://106965238908791"] = {
+                    DisplayName = "4thM1",
+                    ReactionTime = 0.16,
+                },
+                ["rbxassetid://131071815103338"] = {
+                    DisplayName = "Whirlwind",
+                    ReactionTime = 0.32,
+                }
+            },
+            ["SluggerAnims"] = {
+                ["rbxassetid://134829666925953"] = {
+                    DisplayName = "1stM1",
+                    ReactionTime = 0.24,
+                },
+                ["rbxassetid://104867156139010"] = {
+                    DisplayName = "2ndM1",
+                    ReactionTime = 0.22,
+                },
+                ["rbxassetid://112759168172605"] = {
+                    DisplayName = "3rdM1",
+                    ReactionTime = 0.22
+                },
+                ["rbxassetid://114647502301740"] = {
+                    DisplayName = "4thM1",
+                    ReactionTime = 0.19,
+                },
+                ["rbxassetid://118943955490014"] = {
+                    DisplayName = "M2",
+                    ReactionTime = 0.65,
+                }
+            },
+            ["StrikerAnims"] = {
+                ["rbxassetid://127909081017342"] = {
+                    DisplayName = "1stM1"
+                },
+                ["rbxassetid://79563637573277"] = {
+                    DisplayName = "2ndM1"
+                },
+                ["rbxassetid://118070233153900"] = {
+                    DisplayName = "3rdM1"
+                },
+                ["rbxassetid://77710266587706"] = {
+                    DisplayName = "4thM1"
+                },
+                ["rbxassetid://114364673509520"] = {
+                    DisplayName = "M2"
+                },
+                ["rbxassetid://132840225082238"] = {
+                    DisplayName = "1stM1"
+                },
+                ["rbxassetid://88761422474765"] = {
+                    DisplayName = "2ndM1"
+                },
+                ["rbxassetid://98462236639320"] = {
+                    DisplayName = "3rdM1"
+                },
+                ["rbxassetid://122451562066756"] = {
+                    DisplayName = "4thM1"
+                }
+            },
+            ["KureAnims"] = {
+                ["rbxassetid://71676634048602"] = {
+                    DisplayName = "4thM1"
+                },
+                ["rbxassetid://102407060635393"] = {
+                    DisplayName = "M2",
+                    ["ReactionTime"] = 0.01,
+                },
+                ["rbxassetid://82904229252991"] = {
+                    DisplayName = "1stM1"
+                },
+                ["rbxassetid://103732110215321"] = {
+                    DisplayName = "2ndM1"
+                },
+                ["rbxassetid://103964436023727"] = {
+                    DisplayName = "3rdM1"
+                },
+            },
+            ["HakariOtherAnims"] = {
+                ["rbxassetid://126612786608030"] = {
+                    DisplayName = "1stM1"
+                },
+                ["rbxassetid://113719263885794"] = {
+                    DisplayName = "2ndM1"
+                },
+                ["rbxassetid://136305578634960"] = {
+                    DisplayName = "3rdM1"
+                },
+                ["rbxassetid://89039586375625"] = {
+                    DisplayName = "4thM1"
+                },
+                ["rbxassetid://82855179231529"] = {
+                    DisplayName = "MomentumM2"
+                },
+                ["rbxassetid://101619248052969"] = {
+                    DisplayName = "M2"
+                },
             },
         },
-        ["BasicAnims"] = {
-            ["rbxassetid://83491849294956"] = {
-                DisplayName = "1stM1"
-            },
-            ["rbxassetid://89420531853362"] = {
-                DisplayName = "2ndM1"
-            },
-            ["rbxassetid://83730275893449"] = {
-                DisplayName = "3rdM1"
-            },
-            ["rbxassetid://106980660082799"] = {
-                DisplayName = "4thM1"
-            },
-            ["rbxassetid://78888626472394"] = {
-                DisplayName = "M2",
-                ReactionTime = 0.3,
-            },
-            ["M1Time"] = 0.14,
-        },
-        ["WrestlingAnims"] = {
-            ["rbxassetid://91485623489753"] = {
-                DisplayName = "4thM1",
-                ParryTime = 0.08,
-            },
-            ["rbxassetid://73748315742870"] = {
-                DisplayName = "M2",
-                ReactionTime = 0.3,
-            },
-            ["rbxassetid://82903450925391"] = {
-                DisplayName = "1stM1",
-                ParryTime = 0.08,
-            },
-            ["rbxassetid://119685134442395"] = {
-                DisplayName = "2ndM1",
-                ParryTime = 0.08,
-            },
-            ["rbxassetid://107464726433388"] = {
-                DisplayName = "3rdM1",
-                ParryTime = 0.08,
-            },
-            ["M1Time"] = 0.11,
-        },
-        ["MuayThaiAnims"] = {
-            ["rbxassetid://137034747040618"] = {
-                DisplayName = "M2",
-                ReactionTime = 0.3,
-            },
-            ["rbxassetid://74960202100098"] = {
-                DisplayName = "4thM1",
-                ParryTime = 0.08,
-            },
-            ["rbxassetid://104515319350296"] = {
-                DisplayName = "3rdM1",
-                ParryTime = 0.08,
-            },
-            ["rbxassetid://139911027872047"] = {
-                DisplayName = "2ndM1",
-                ParryTime = 0.08,
-            },
-            ["rbxassetid://96726284968458"] = {
-                DisplayName = "1stM1",
-                ParryTime = 0.08,
-            },
-            ["M1Time"] = 0.1,
-        },
-        ["BoxingAnims"] = {
-            ["rbxassetid://137980914350618"] = {
-                DisplayName = "1stM1",
-                ReactionTime = 0.12,
-            },
-            ["rbxassetid://100408082509740"] = {
-                DisplayName = "2ndM1",
-                ReactionTime = 0.12,
-            },
-            ["rbxassetid://94803478352691"] = {
-                DisplayName = "3rdM1",
-                ReactionTime = 0.15,
-            },
-            ["rbxassetid://78695517680318"] = {
-                DisplayName = "4thM1",
-                ReactionTime = 0.15,
-            },
-            ["rbxassetid://132022052139564"] = {
-                DisplayName = "M2",
-                ParryFunction = function(data)
-                    if data.RegistryData.Processed == true then warn("no") return end
-                    data.RegistryData.Processed = true
-                    task.spawn(function()
-                        print("Boxing parry")
-                        task.wait(.3)
-                        Dodge()
-                        task.wait(.35)
-                        BlockStart(os.clock(), 0.6)
-                    end)
-                end,
-            },
-        },
-        ["HakariAnims"] = {
-            ["rbxassetid://82855179231529"] = {
-                DisplayName = "MomentumM2"
-            },
-            ["rbxassetid://76236532060812"] = {
-                DisplayName = "1stM1",
-                ReactionTime = 0.15,
-            },
-            ["rbxassetid://74206130671324"] = {
-                DisplayName = "2ndM1",
-                ReactionTime = 0.17,
-            },
-            ["rbxassetid://71919935695307"] = {
-                DisplayName = "3rdM1",
-                ReactionTime = 0.15,
-            },
-            ["rbxassetid://122861547142657"] = {
-                DisplayName = "4thM1",
-                ReactionTime = 0.21,
-            },
-            ["rbxassetid://92851992709496"] = {
-                DisplayName = "M2",
-                ReactionTime = 0.35,
-            },
-        },
-        ["CapoeiraAnims"] = {
-            ["rbxassetid://125976167173936"] = {
-                DisplayName = "1stM1",
-                ReactionTime = 0.15,
-            },
-            ["rbxassetid://134945199381140"] = {
-                DisplayName = "2ndM1",
-                ReactionTime = 0.22,
-            },
-            ["rbxassetid://117877243065533"] = {
-                DisplayName = "3rdM1",
-                ReactionTime = 0.16,
-            },
-            ["rbxassetid://106965238908791"] = {
-                DisplayName = "4thM1",
-                ReactionTime = 0.16,
-            },
-            ["rbxassetid://131071815103338"] = {
-                DisplayName = "Whirlwind",
-                ReactionTime = 0.32,
-            }
-        },
-        ["SluggerAnims"] = {
-            ["rbxassetid://134829666925953"] = {
-                DisplayName = "1stM1",
-                ReactionTime = 0.24,
-            },
-            ["rbxassetid://104867156139010"] = {
-                DisplayName = "2ndM1",
-                ReactionTime = 0.22,
-            },
-            ["rbxassetid://112759168172605"] = {
-                DisplayName = "3rdM1",
-                ReactionTime = 0.22
-            },
-            ["rbxassetid://114647502301740"] = {
-                DisplayName = "4thM1",
-                ReactionTime = 0.19,
-            },
-            ["rbxassetid://118943955490014"] = {
-                DisplayName = "M2",
-                ReactionTime = 0.65,
-            }
-        },
-        ["StrikerAnims"] = {
-            ["rbxassetid://127909081017342"] = {
-                DisplayName = "1stM1"
-            },
-            ["rbxassetid://79563637573277"] = {
-                DisplayName = "2ndM1"
-            },
-            ["rbxassetid://118070233153900"] = {
-                DisplayName = "3rdM1"
-            },
-            ["rbxassetid://77710266587706"] = {
-                DisplayName = "4thM1"
-            },
-            ["rbxassetid://114364673509520"] = {
-                DisplayName = "M2"
-            },
-            ["rbxassetid://132840225082238"] = {
-                DisplayName = "1stM1"
-            },
-            ["rbxassetid://88761422474765"] = {
-                DisplayName = "2ndM1"
-            },
-            ["rbxassetid://98462236639320"] = {
-                DisplayName = "3rdM1"
-            },
-            ["rbxassetid://122451562066756"] = {
-                DisplayName = "4thM1"
-            }
-        },
-        ["KureAnims"] = {
-            ["rbxassetid://71676634048602"] = {
-                DisplayName = "4thM1"
-            },
-            ["rbxassetid://102407060635393"] = {
-                DisplayName = "M2",
-                ["ReactionTime"] = 0.01,
-            },
-            ["rbxassetid://82904229252991"] = {
-                DisplayName = "1stM1"
-            },
-            ["rbxassetid://103732110215321"] = {
-                DisplayName = "2ndM1"
-            },
-            ["rbxassetid://103964436023727"] = {
-                DisplayName = "3rdM1"
-            },
-        },
-        ["HakariOtherAnims"] = {
-            ["rbxassetid://126612786608030"] = {
-                DisplayName = "1stM1"
-            },
-            ["rbxassetid://113719263885794"] = {
-                DisplayName = "2ndM1"
-            },
-            ["rbxassetid://136305578634960"] = {
-                DisplayName = "3rdM1"
-            },
-            ["rbxassetid://89039586375625"] = {
-                DisplayName = "4thM1"
-            },
-            ["rbxassetid://82855179231529"] = {
-                DisplayName = "MomentumM2"
-            },
-            ["rbxassetid://101619248052969"] = {
-                DisplayName = "M2"
-            },
-        },
-        IgnoreIds = {73766443218740,111699625251889,85823794654077,83600639547203,99661732639863,106268941365574,109816855387997,122561749929324,129805948180599,90752347516770,135133599113049,132695091086148,137015026151472,114511731321756,122541287927198,80309578200579,100794890036133,109303037515668,117293898907979,74690341409113,73090768467054,72284079162560,92787945841620,89016181362524,76945839486275,101161965631044,80135556847061,128307941333158,85931837451298,91352556581859, 104407197874289,77911299793653,129335968179665, 122384188141033,132695766056641,113331696487725,124220338099067,99799500309776,108636808436488,90015977935891,87932588807124,132477488202815,102982320608759,109278619250401,79971841883936,97783129267001,72822821848529,79974955602012,77798715679680,85845666927963,108862846290180,108045962864902,93184693099565,120399899079666,99958962160522,},
+        IgnoreIds = {73766443218740,111699625251889,85823794654077,83600639547203,99661732639863,106268941365574,109816855387997,122561749929324,129805948180599,90752347516770,135133599113049,132695091086148,137015026151472,114511731321756,122541287927198,80309578200579,100794890036133,109303037515668,117293898907979,74690341409113,73090768467054,72284079162560,92787945841620,89016181362524,76945839486275,101161965631044,80135556847061,128307941333158,85931837451298,91352556581859, 104407197874289,77911299793653,129335968179665, 122384188141033,132695766056641,113331696487725,124220338099067,99799500309776,108636808436488,90015977935891,87932588807124,132477488202815,102982320608759,109278619250401,79971841883936,97783129267001,72822821848529,79974955602012,77798715679680,85845666927963,108862846290180,108045962864902,93184693099565,120399899079666,99958962160522},
         ParriedAnimation = {"rbxassetid://100773926241456", "rbxassetid://102823909334302", "rbxassetid://96304721384743", "rbxassetid://82979105739696", "rbxassetid://96600699015093", "rbxassetid://138519505081692"},
         StunnedAnimation = {"rbxassetid://9598562590", "rbxassetid://9598537410", "rbxassetid://9598551746"},
         ParryingAnimation = {"rbxassetid://118147060185189"},
-
-        --// AUTO PARRY STATE
-        AnimationsLoggedCache = {},
-        AnimationsLoggedOrder = {},
-        AnimationIdSliders = {},
-        pendingTasks = {},
-        ParryKey = string.byte("F"),
-        DodgeKey = string.byte("A"),
-        KeyHeld = false,
-        ReleaseDeadline = 0,
-        Stunned = false,
-        damageLoggerConnection = nil,
-        previousHealth = 100,
-        lastCharacter = nil,
-        TargetCharacters = {},
-        EspTrackers = {},
-        CurrentIndex = 1,
-        COLOR_WHITE = Color3.fromRGB(255, 255, 255),
-        COLOR_RED = Color3.fromRGB(255, 50, 50),
-        COLOR_GREEN = Color3.fromRGB(50, 255, 50),
-        AnimationRegistry = {},
-        LastPendingRegData = nil,
-        InputRegisteredTime = nil,
-        ParryRegisteredTime = nil,
-        InputLatency = 0,
-        DodgeLockoutEnd = 0,
-        StunToken = 0,
-        lastParryAt = 0,
-        animationAddedConnection = nil,
-        inputBeganConnection = nil,
-        orbListenerConnection = nil,
-        ParryState = {
-            IDLE = "idle",
-            INPUT_PENDING = "input_pending",
-            PARRYING = "parrying",
-            PARRYINGFAILED = "parryingfailed",
-            STUNNED = "stunned",
-            WINDOW_EXCEEDED = "window_exceeded",
-            SUCCESS = "parrysuccess",
+    },
+    AnimationsLoggedCache = {},
+    AnimationsLoggedOrder = {},
+    AnimationIdSliders = {},
+    pendingTasks = {},
+    ParryKey = string.byte("F"),
+    DodgeKey = string.byte("A"),
+    KeyHeld = false,
+    ReleaseDeadline = 0,
+    Stunned = false,
+    damageLoggerConnection = nil,
+    previousHealth = 100,
+    lastCharacter = nil,
+    TargetCharacters = {},
+    EspTrackers = {},
+    CurrentIndex = 1,
+    COLOR_WHITE = Color3.fromRGB(255, 255, 255),
+    COLOR_RED = Color3.fromRGB(255, 50, 50),
+    COLOR_GREEN = Color3.fromRGB(50, 255, 50),
+    AnimationRegistry = {},
+    LastPendingRegData = nil,
+    InputRegisteredTime = nil,
+    ParryRegisteredTime = nil,
+    InputLatency = 0,
+    DodgeLockoutEnd = 0,
+    StunToken = 0,
+    lastParryAt = 0,
+    animationAddedConnection = nil,
+    inputBeganConnection = nil,
+    orbListenerConnection = nil,
+    ParryState = {
+        IDLE = "idle",
+        INPUT_PENDING = "input_pending",
+        PARRYING = "parrying",
+        PARRYINGFAILED = "parryingfailed",
+        STUNNED = "stunned",
+        WINDOW_EXCEEDED = "window_exceeded",
+        SUCCESS = "parrysuccess",
+    },
+    CurrentParryState = "idle",
+    AUTOPLAY_ENABLED = false,
+    SHOW_ESP = false,
+    SHOW_HIT_LINE = true,
+    SHOW_CIRCLES = true,
+    SHOW_HOLD_TAILS = true,
+    AUTO_DETECT_LANES = true,
+    REQUIRE_GAME_FOCUS = true,
+    DEBUG_LOGGING = false,
+    ACTIVE_LANE_COUNT = 4,
+    CURRENT_KEYS = {88, 67, 78, 77,},
+    LANE_ENABLED = {true, true, true, true},
+    LANE_REFRESH_INTERVAL = 0.5,
+    SCALE_UPDATE_INTERVAL = 0.25,
+    AUTOPLAY_CONFIG = {
+        HOLD_MIN_H = 20,
+        TAP_HOLD_SEC = 0.05,
+        TOUCH_DIST = 30,
+        PAST_CATCH = 30,
+        APPROACH_DIST = 300,
+        MIN_DIST_X = 100,
+        LINE_THICK = 4,
+        CIRCLE_RADIUS = 20,
+        CIRCLE_SIDES = 48,
+        CIRCLE_THICK = 2,
+        TAIL_THICK = 5,
+        MAX_CIRCLES = 8,
+        LANE_COLORS = {
+            Color3.fromRGB(180, 255, 180),
+            Color3.fromRGB(255, 255, 255),
+            Color3.fromRGB(100, 220, 100),
+            Color3.fromRGB(60, 180, 60),
         },
-        CurrentParryState = "idle",
+        COLOR_ON_LINE = Color3.fromRGB(255, 255, 255),
+        COLOR_HOLD = Color3.fromRGB(150, 255, 150),
+        COLOR_APPROACH = Color3.fromRGB(100, 130, 100),
+        LINE_COLOR = Color3.fromRGB(255, 255, 255),
+    },
 
-        --// AUTOPLAY SETTINGS
-        AUTOPLAY_ENABLED = false,
-        SHOW_ESP = false,
-        SHOW_HIT_LINE = true,
-        SHOW_CIRCLES = true,
-        SHOW_HOLD_TAILS = true,
-        AUTO_DETECT_LANES = true,
-        REQUIRE_GAME_FOCUS = true,
-        DEBUG_LOGGING = false,
-        ACTIVE_LANE_COUNT = 4,
-        CURRENT_KEYS = {88, 67, 78, 77,},
-        LANE_ENABLED = {true, true, true, true},
-        LANE_REFRESH_INTERVAL = 0.5,
-        SCALE_UPDATE_INTERVAL = 0.25,
-        AUTOPLAY_CONFIG = {
-            HOLD_MIN_H = 20,
-            TAP_HOLD_SEC = 0.05,
-            TOUCH_DIST = 30,
-            PAST_CATCH = 30,
-            APPROACH_DIST = 300,
-            MIN_DIST_X = 100,
-            LINE_THICK = 4,
-            CIRCLE_RADIUS = 20,
-            CIRCLE_SIDES = 48,
-            CIRCLE_THICK = 2,
-            TAIL_THICK = 5,
-            MAX_CIRCLES = 8,
-            LANE_COLORS = {
-                Color3.fromRGB(180, 255, 180),
-                Color3.fromRGB(255, 255, 255),
-                Color3.fromRGB(100, 220, 100),
-                Color3.fromRGB(60, 180, 60),
-            },
-            COLOR_ON_LINE = Color3.fromRGB(255, 255, 255),
-            COLOR_HOLD = Color3.fromRGB(150, 255, 150),
-            COLOR_APPROACH = Color3.fromRGB(100, 130, 100),
-            LINE_COLOR = Color3.fromRGB(255, 255, 255),
-        },
+    --// AUTO-GREEN SETTINGS
+    AUTO_GREEN_ENABLED = false,
+    SHOOT_KEY = 70,
+    RELEASE_TARGET = 0.274,
+    DETECT_THRESHOLD = 0.95,
+    SHOT_TIMEOUT = 3,
+    shotCount = 0,
+    shotState = "idle",
+    shotStartTime = 0,
 
-        --// AUTO-GREEN SETTINGS
-        AUTO_GREEN_ENABLED = false,
-        SHOOT_KEY = 70,
-        RELEASE_TARGET = 0.274,
-        DETECT_THRESHOLD = 0.95,
-        SHOT_TIMEOUT = 3,
-        shotCount = 0,
-        shotState = "idle",
-        shotStartTime = 0,
-
-        --// AUTOPLAY STATE
-        tapHeld = {},
-        tapReleaseAt = {},
-        holdActive = {},
-        holdStartAt = {},
-        seenNotes = {},
-        lanesValid = false,
-        laneData = nil,
-        notesContainer = nil,
-        espScale = 1,
-        lastLaneRefresh = 0,
-        lastScaleUpdate = 0,
-        lastCleanupTime = 0,
-        CLEANUP_INTERVAL = 0.02,
-    }
+    --// AUTOPLAY STATE
+    tapHeld = {},
+    tapReleaseAt = {},
+    holdActive = {},
+    holdStartAt = {},
+    seenNotes = {},
+    lanesValid = false,
+    laneData = nil,
+    notesContainer = nil,
+    espScale = 1,
+    lastLaneRefresh = 0,
+    lastScaleUpdate = 0,
+    lastCleanupTime = 0,
+    CLEANUP_INTERVAL = 0.02,
 }
 
-local AnimationTracker = AnimationTracker.new(Config.IgnoreIds),
-local LocalTracker = AnimationTracker.new(Config.IgnoreIds),
+local AnimationTracker = AnimationTracker.new(Config.Anims.IgnoreIds)
+local LocalTracker = AnimationTracker.new(Config.Anims.IgnoreIds)
 
 --// AUTO PARRY Config.AUTOPLAY_CONFIG FLATTENING
 local FlattenedConfig = {}
-for styleName, assets in pairs(Config.Anims) do
+for styleName, assets in pairs(Config.Anims.FightingStyle) do
+    local m1Time = assets["M1Time"]
+
     for assetId, data in pairs(assets) do
         if assetId == "M1Time" then continue end
-        if assets["M1Time"] then end
+        if type(data) ~= "table" then continue end
+
         local flatData = table.clone(data) or {}
         flatData.Style = styleName
-        if data.DisplayName ~= "M2" and assets["M1Time"] then
-            flatData.ReactionTime = assets["M1Time"]
+
+        if data.DisplayName ~= "M2" and M1Time then
+            flatData.ReactionTime = M1Time
         elseif not data.ReactionTime then
             flatData.DefaultReactionTime = Config.DEFAULT_REACTION_TIME
         else
             flatData.ReactionTime = data.ReactionTime
         end
+
         FlattenedConfig[assetId] = flatData
     end
 end
-Config.Anims = FlattenedConfig
+Config.Anims.FightingStyle = FlattenedConfig
 
 --// AUTO PARRY FORWARD DECLARATIONS
-local Lib, LoggedText, IgnoredText, TargetPool_Text, scheduler
+local Lib, LoggedText, IgnoredText, TargetPool_Text
+local scheduler = {}
 
 --// AUTO PARRY SCHEDULER
 function scheduler.delay(delayTime, callback)
-    table.insert(pendingTasks, {
+    table.insert(Config.pendingTasks, {
         executeAt = os.clock() + delayTime,
         callback = callback,
     })
@@ -433,10 +435,10 @@ end
 
 function scheduler.update()
     local now = os.clock()
-    for i = #pendingTasks, 1, -1 do
-        local task = pendingTasks[i]
+    for i = #Config.pendingTasks, 1, -1 do
+        local task = Config.pendingTasks[i]
         if now >= task.executeAt then
-            table.remove(pendingTasks, i)
+            table.remove(Config.pendingTasks, i)
             coroutine.wrap(task.callback)()
         end
     end
@@ -474,7 +476,8 @@ local function UpdateClipboardSection()
         AnimationsLoggedCount += 1
     end
     if LoggedText then LoggedText:SetText("Logged Ids: " .. AnimationsLoggedCount) end
-    if IgnoredText then IgnoredText:SetText("Ignored Ids: " .. #Config.IgnoreIds) end
+    print(Config.Anims)
+    if IgnoredText then IgnoredText:SetText("Ignored Ids: " .. #Config.Anims.IgnoreIds) end
 end
 
 local function UpdateTargetPoolSection()
@@ -517,13 +520,13 @@ local function SetClipboardIgnoreList()
     for AnimationId, _ in pairs(Config.AnimationsLoggedCache) do
         local numericId = tonumber(string.match(tostring(AnimationId), "%d+"))
         if numericId then
-            table.insert(Config.IgnoreIds, numericId)
+            table.insert(Config.Anims.IgnoreIds, numericId)
             table.insert(newlyAddedIds, tostring(numericId))
         end
     end
     local outputstring = table.concat(newlyAddedIds, ", ")
     setclipboard(outputstring)
-    print(string.format("[Clipboard] Copied %d NEW IDs! (Total ignored: %d)", #newlyAddedIds, #Config.IgnoreIds))
+    print(string.format("[Clipboard] Copied %d NEW IDs! (Total ignored: %d)", #newlyAddedIds, #Config.Anims.IgnoreIds))
 end
 
 local function LogAnimation(assetId, trackInfo)
@@ -535,7 +538,7 @@ local function LogAnimation(assetId, trackInfo)
 end
 
 local function UpdateSliders()
-    for animationId, Info in pairs(Config.Anims) do
+    for animationId, Info in pairs(Config.Anims.FightingStyle) do
         if Config.AnimationIdSliders[animationId] then
             Info.DefaultReactionTime = Config.DEFAULT_REACTION_TIME
             local ReactionTime = Info.M1Time or Info.ReactionTime or Info.DefaultReactionTime
@@ -622,7 +625,7 @@ local function ToggleDamageLogger(state)
                 for _, anim in activeAnimations do
                     if not anim.AnimationId or anim.TimePosition < 0.1 or anim.TimePosition > 0.7 then continue end
                     local assetId = tostring(anim.AnimationId)
-                    local poolData = Config.Anims[assetId]
+                    local poolData = Config.Anims.FightingStyle[assetId]
                     warn(string.format("[HIT] %d DMG | Anim: %s (%s) %s | Frame Time: %.3f",
                         damageTaken,
                         poolData and poolData.DisplayName or anim.Name or "Unknown",
@@ -784,7 +787,7 @@ end
 local function OnSuccessfulParry()
     if Config.CurrentParryState == Config.ParryState.PARRYING then
         local AnimId = Config.LastPendingRegData.AnimationId
-        local AttackConfig = Config.Anims[AnimId]
+        local AttackConfig = Config.Anims.FightingStyle[AnimId]
         local ParryPressTime = tonumber(Config.InputRegisteredTime - Config.LastPendingRegData.StartTime)
         if ParryPressTime > 1 or ParryPressTime < 0 then return end
         if Lib then
@@ -829,7 +832,7 @@ local function ParryTask()
         local MaxLatency = 0.5
         local TimePassedSinceFWasPressed = now - Config.InputRegisteredTime
         local ActiveAnims = GetActiveAnimationsForCharacterAsDictionary(LocalPlayer.Character)
-        if ActiveAnims and ActiveAnims[ParryingAnimation[1]] then
+        if ActiveAnims and ActiveAnims[Config.Anims.ParryingAnimation[1]] then
             OnParryingAnimationSuccess()
         end
         if TimePassedSinceFWasPressed > MaxLatency then
@@ -853,14 +856,14 @@ end
 --// AUTO PARRY LOCAL ANIMATION HANDLER
 local function onLocalAnimationAdded(anim)
     local animId = anim.AnimationId
-    if table.find(Config.ParriedAnimation, animId) then
+    if table.find(Config.Anims.ParriedAnimation, animId) then
         OnSuccessfulParry()
     end
-    if table.find(Config.ParryingAnimation, animId) then
+    if table.find(Config.Anims.ParryingAnimation, animId) then
         if not Config.InputRegisteredTime then return end
         OnParryingAnimationSuccess()
     end
-    if table.find(Config.StunnedAnimation, animId) then
+    if table.find(Config.Anims.StunnedAnimation, animId) then
         OnStunned()
     end
 end
@@ -989,7 +992,7 @@ end
 
 local function EvaluateAnimation(anim, character, LocalCharacter, localRoot, targetRoot, currentActiveIds)
     if not anim.AnimationId then return end
-    local attackConfig = Config.Anims[tostring(anim.AnimationId)]
+    local attackConfig = Config.Anims.FightingStyle[tostring(anim.AnimationId)]
     if not attackConfig then return end
     local animKey = anim.Address or anim
     currentActiveIds[animKey] = true
@@ -1065,8 +1068,8 @@ local function ProcessEspAndLogging()
             if not anim.AnimationId then continue end
             local assetId = anim.AnimationId
             local numericId = tonumber(string.match(tostring(assetId), "%d+"))
-            if numericId and table.find(IgnoreIds, numericId) then continue end
-            local poolData = Config.Anims[tostring(assetId)]
+            if numericId and table.find(Config.Anims.IgnoreIds, numericId) then continue end
+            local poolData = Config.Anims.FightingStyle[tostring(assetId)]
             local resolvedName = poolData and poolData.DisplayName or anim.Name
             if not poolData then
                 LogAnimation(assetId, { Name = resolvedName, AnimationId = assetId })
@@ -1921,7 +1924,7 @@ end)
 --// AUTO PARRY STYLE CONFIGURATIONS
 local styleConfigTab = win:Tab("Style Configurations", "swords")
 local GroupedStyles = {}
-for animationId, Info in pairs(Config.Anims) do
+for animationId, Info in pairs(Config.Anims.FightingStyle) do
     local StyleName = Info.Style
     if not GroupedStyles[StyleName] then
         GroupedStyles[StyleName] = {}
