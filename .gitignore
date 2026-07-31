@@ -1,8 +1,10 @@
 # Ignore the files
-assets\
-Utils\Matcha.bat
-Utils\Matcha.lnk
+assets/
+Utils/Matcha.bat
+Utils/Matcha.lnk
+*.luau
 
 # IDE settings
-.vscode\
-.codex\
+.vscode/
+.codex/
+.continue/

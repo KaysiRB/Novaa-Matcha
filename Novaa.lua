@@ -51,6 +51,10 @@ local GAMES = {
         Name = "Gakuran",
         Module = "Games/Gakuran.luau",
     },
+    [1202096104] = {
+        Name = "Driving Empire",
+        Module = "Games/DrivingEmpire.luau",
+    },
 }
 
 local gameId = game.GameId
