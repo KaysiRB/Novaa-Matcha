@@ -1,8 +1,8 @@
-log("1")
-
 local function log(message)
     print("[Universal] " .. tostring(message))
 end
+
+log("1")
 
 local Lib = env and (env.Lib or env.lib) or _G.INSui
 local win = env and (env.win or env.window) or nil
