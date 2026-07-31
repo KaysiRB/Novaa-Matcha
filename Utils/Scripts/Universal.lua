@@ -1,4 +1,14 @@
-return {
+local Universal = {}
+
+return function(env)
+    local Lib = env and env.Lib or _G.INSui
+    local win = env and env.win or nil
+    local cleanup = env and env.cleanup or nil
+
+    if not Lib or not win then
+        return Universal
+    end
+
     Lib:Category("Universal")
 
     --// VISUALS
@@ -21,7 +31,9 @@ return {
             title = "Unload Novaa?",
             text = "This will remove all drawings and close the UI.",
             confirm = "Unload",
-            onConfirm = cleanup(),
+            onConfirm = cleanup,
         })
     end):SetRisk()
-}
+
+    return Universal
+end
