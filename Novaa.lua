@@ -80,7 +80,8 @@ local function startGameModule()
     return true
 end
 
-log("GameId: " .. tostring(gameId))
+local gameIdText = "GameId: " .. tostring(gameId)
+log(gameIdText)
 log(gameInfo and ("Detected game: " .. gameInfo.Name) or "Unknown game")
 
 startGameModule()
