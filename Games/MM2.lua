@@ -328,6 +328,21 @@ local function cleanup()
 	Lib:Destroy()
 end
 
+local function loadUniversalModule()
+	local ok, module = pcall(function()
+		return loadstring(game:HttpGet(BASE_URL .. "Utils/Scripts/Universal.lua"))()
+	end)
+	if not ok or type(module) ~= "function" then
+		return
+	end
+
+	pcall(module, {
+		Lib = Lib,
+		win = win,
+		cleanup = cleanup,
+	})
+end
+
 --// GAME INFO
 local gameInfoTab = win:Tab("Game", "gamepad")
 local gameInfo = gameInfoTab:Section("Game Info", "Full", "Information about the current game")
@@ -392,7 +407,7 @@ roleColors:Colorpicker("Dropped gun", COLORS.Gun, function(color)
 end)
 
 --// Universal
-loadstring(game:HttpGet(BASE_URL.."Utils/Scripts/Universal.lua"))()
+loadUniversalModule()
 
 --// ESP LOOP
 local renderConnection

@@ -375,6 +375,21 @@ local function cleanup()
     win:Destroy()
 end
 
+local function loadUniversalModule()
+    local ok, module = pcall(function()
+        return loadstring(game:HttpGet(BASE_URL .. "Utils/Scripts/Universal.lua"))()
+    end)
+    if not ok or type(module) ~= "function" then
+        return
+    end
+
+    pcall(module, {
+        Lib = Lib,
+        win = win,
+        cleanup = cleanup,
+    })
+end
+
 local function toggleFarm()
     if os.clock() - state.lastToggle < 0.3 then
         return
@@ -514,7 +529,7 @@ end
 createStatsUI()
 
 --// Universal
-loadstring(game:HttpGet(BASE_URL.."Utils/Scripts/Universal.lua"))()
+loadUniversalModule()
 
 win:autoloadConfig("DrivingEmpire")
 win:Notify("Novaa", "Script is ready!", 3, "success")

@@ -1843,6 +1843,21 @@ local function cleanup()
     Lib:Destroy()
 end
 
+local function loadUniversalModule()
+    local ok, module = pcall(function()
+        return loadstring(game:HttpGet(BASE_URL .. "Utils/Scripts/Universal.lua"))()
+    end)
+    if not ok or type(module) ~= "function" then
+        return
+    end
+
+    pcall(module, {
+        Lib = Lib,
+        win = win,
+        cleanup = cleanup,
+    })
+end
+
 --// GAME INFO
 local gameInfoTab = win:Tab("Game", "gamepad")
 local gameInfo = gameInfoTab:Section("Game Info", "Full", "Information about the current game")
@@ -2133,7 +2148,7 @@ rhythmAdvanced:Slider("Tail thickness", CONFIG.TAIL_THICK, 1, 1, 12, " px", func
 end)
 
 --// Universal
-loadstring(game:HttpGet(BASE_URL.."Utils/Scripts/Universal.lua"))()
+loadUniversalModule()
 
 --// MAIN LOOP
 local UTILITY_TICK = 0.5

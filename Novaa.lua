@@ -1,5 +1,3 @@
--- Novaa main loader: exact GameId -> game module selection.
-
 local BASE_URL = "https://raw.githubusercontent.com/KaysiRB/Novaa-Matcha/main/"
 
 local function log(message)
