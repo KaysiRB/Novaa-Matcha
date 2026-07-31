@@ -1,3 +1,5 @@
+local BASE_URL = "https://raw.githubusercontent.com/KaysiRB/Novaa-Matcha/main/"
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -5,8 +7,8 @@ local LocalPlayer = Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
 
 --// AUTO PARRY IMPORTS
-local ImportESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/artxficial/matchastuff/main/esp_utility.lua"))()
-local ImportAnimationTracker = loadstring(game:HttpGet("https://raw.githubusercontent.com/artxficial/matchastuff/main/animationtracker.lua"))()
+local ImportESP = loadstring(game:HttpGet(BASE_URL.."Utils/Scripts/ESPUtility.lua"))()
+local ImportAnimationTracker = loadstring(game:HttpGet(BASE_URL.."Utils/Scripts/AnimationTracker.lua"))()
 
 --// AUTO PARRY SETTINGS
 local AUTO_PARRY_ENABLED = true
@@ -1808,7 +1810,7 @@ end
 _G.Gakuran_Running = true
 
 --// LOAD UI
-Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/neaxusxgod-png/INS-ui/main/uilib.min.lua"))() or INSui
+Lib = loadstring(game:HttpGet(BASE_URL.."Utils/Scripts/INS-UI.lua"))() or INSui
 local win = Lib:CreateWindow({
     title = "Novaa - v1.0.0",
     subtitle = "auto",

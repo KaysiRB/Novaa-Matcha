@@ -1,3 +1,5 @@
+local BASE_URL = "https://raw.githubusercontent.com/KaysiRB/Novaa-Matcha/main/"
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -293,7 +295,7 @@ end
 _G.MM2ESP_Running = true
 
 --// LOAD UI
-local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/neaxusxgod-png/INS-ui/main/uilib.min.lua"))() or INSui
+local Lib = loadstring(game:HttpGet(BASE_URL.."Utils/Scripts/INS-UI.lua"))() or INSui
 local win = Lib:CreateWindow({
 	title = "Novaa - v1.0.0",
 	subtitle = "auto",
