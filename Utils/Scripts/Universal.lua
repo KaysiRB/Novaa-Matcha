@@ -1,4 +1,15 @@
-return {
+local Universal = {}
+
+return function(env)
+    local Lib = env and env.Lib or _G.INSui
+    local win = env and env.win or nil
+    local cleanup = env and env.cleanup or nil
+
+    if not Lib or not win then
+        log("No lib")
+        return Universal
+    end
+
     Lib:Category("Universal")
 
     --// VISUALS
@@ -24,4 +35,6 @@ return {
             onConfirm = cleanup,
         })
     end):SetRisk()
-}
+
+    return Universal
+end
