@@ -1,3 +1,5 @@
+log("1")
+
 local function log(message)
     print("[Universal] " .. tostring(message))
 end
