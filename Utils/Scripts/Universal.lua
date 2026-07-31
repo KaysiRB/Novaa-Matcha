@@ -36,5 +36,6 @@ return function(env)
         })
     end):SetRisk()
 
+    log("Done!")
     return Universal
 end
