@@ -1,46 +1,27 @@
--- Universal script chargé après le script spécifique au jeu.
--- Interface INS-ui universelle, avec un onglet Misc et un bouton unload.
+return {
+    Lib:Category("Universal")
 
-local Universal = {}
+    --// VISUALS
+    local visuals = win:Tab("Visuals", "eye")
+    local universalVisuals = visuals:Section("Universal Visuals", "Full", "Features shared between supported games")
+    universalVisuals:Info("Universal visual features will be added here.")
+    universalVisuals:Toggle("Watermark", false)
+    universalVisuals:Toggle("FPS counter", false)
 
-function Universal:init(env)
-    self.env = env
-    self.env.registerModule("universal", self)
-    self.gui = env.createGui and env.createGui("Novaa Universal")
-    self.running = true
-    self:startLoops()
-end
+    --// PLAYER
+    local playerTab = win:Tab("Player", "user")
+    local movement = playerTab:Section("Movement", "Full", "Universal player settings")
+    movement:Info("Universal movement features will be added here.")
 
-function Universal:startLoops()
-    spawn(function()
-        while self.running and not self.env.unloadRequested() do
-            wait(2)
-            -- logique universelle si nécessaire
-        end
-    end)
-end
-
-function Universal:createTabs()
-    local tabs = {
-        {
-            name = "Misc",
-            buttons = {
-                {label = "Unload All", callback = function()
-                    self.env.unloadAll()
-                end}
-            }
-        }
-    }
-    return tabs
-end
-
-function Universal:unload()
-    self.running = false
-    self.env.unregisterModule("universal")
-end
-
-return function(env)
-    local script = setmetatable({}, {__index = Universal})
-    script:init(env)
-    return script
-end
+    --// MISC
+    local misc = win:Tab("Misc", "three-dots-horizontal")
+    local utilities = misc:Section("Utilities", "Full")
+    utilities:Button("Unload", function()
+        Lib:Dialog({
+            title = "Unload Novaa?",
+            text = "This will remove all drawings and close the UI.",
+            confirm = "Unload",
+            onConfirm = cleanup(),
+        })
+    end):SetRisk()
+}
